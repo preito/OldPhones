@@ -1,0 +1,145 @@
+.manage-listings-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.listings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.listings-header h2 {
+  color: #333;
+  font-size: 1.8rem;
+}
+
+.add-listing-button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-listing-button:hover {
+  background-color: #218838;
+}
+
+.listings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.listing-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.listing-card.inactive {
+  opacity: 0.7;
+  background-color: #f8f9fa;
+}
+
+.listing-status {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-badge.inactive {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.listing-content {
+  flex: 1;
+}
+
+.listing-title {
+  color: #333;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.listing-price {
+  color: #28a745;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.listing-condition {
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.listing-description {
+  color: #444;
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+}
+
+.listing-date {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.listing-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.toggle-status-button {
+  flex: 1;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.toggle-status-button:hover {
+  background-color: #0056b3;
+}
+
+.delete-button {
+  flex: 1;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.delete-button:hover {
+  background-color: #c82333;
+} 

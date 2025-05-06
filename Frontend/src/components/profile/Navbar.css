@@ -1,0 +1,90 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap");
+
+.logo {
+  margin-right: auto;
+}
+
+.logo a {
+  color: #f2f2f2;
+  font-size: 26px;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0 20px;
+  display: inline-block;
+  line-height: 70px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+.profile-header {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background: #242526;
+  z-index: 99;
+}
+
+.profile-header nav {
+  max-width: 1300px;
+  margin: auto;
+  padding: 0px 30px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+}
+
+.logo a {
+  color: #f2f2f2;
+  font-size: 26px;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0 20px;
+  display: inline-block;
+  line-height: 70px;
+}
+
+.profile-header nav ul {
+  display: flex;
+  margin-left: auto; /* Push nav items to the right */
+  list-style: none;
+  gap: 10px;
+}
+
+.profile-header nav ul button {
+  background: none;
+  border: none;
+  color: #f2f2f2;
+  font-size: 18px;
+  font-weight: 500;
+  padding: 9px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.profile-header nav ul button:hover {
+  background: #3a3b3c;
+}
+
+@media screen and (max-width: 768px) {
+  .profile-header nav {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profile-header nav ul {
+    flex-direction: column;
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .profile-header nav ul button {
+    width: 100%;
+    text-align: left;
+  }
+}
