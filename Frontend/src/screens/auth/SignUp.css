@@ -72,4 +72,6 @@ html, body {
   .signup-button:hover {
     background-color: #218838;
   }
-  
+  .error{
+    color: rgb(220, 21, 21);
+  }
