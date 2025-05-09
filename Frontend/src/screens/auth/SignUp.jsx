@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./SignUp.css";
+// import axios from "axios";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -71,13 +72,22 @@ const SignUp = () => {
       try {
         // Make API call to create Account
 
+        try {
+          // const response = await axios.post("/api/send-verification-email", {
+          //   email,
+          // });
+
+          console.log("Email sent successfully!", response.data);
+        } catch (error) {
+          console.error("Failed to send email:", error);
+        }
+
         // TODO: Do not forget to Hash the passwords upon account creation.
 
         console.log("Form submitted:", formData);
         // Simulate API call
         await new Promise((resolve) => setTimeout(resolve, 1000));
         alert("Verification email has been sent! Please check your inbox.");
-        
       } catch (error) {
         console.error("Error:", error);
         setErrors({ submit: "Failed to create account. Please try again." });

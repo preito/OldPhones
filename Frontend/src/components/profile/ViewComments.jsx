@@ -5,25 +5,21 @@ const ViewComments = () => {
   // Mock data for phone listings with reviews
   const mockListings = [
     {
-      id: 1,
-      title: "Galaxy s III mini SM-G730V Verizon Cell Phone BLUE",
-      brand: "Samsung",
-      image: "https://example.com/phone1.jpg",
-      reviews: [
+      "title": "Galaxy s III mini SM-G730V Verizon Cell Phone BLUE",
+      "brand": "Samsung",
+      "image": "imageurl",
+      "stock": 9,
+      "seller": "5f5237a4c1beb1523fa3db73",
+      "price": 56.0,
+      "reviews": [
         {
-          reviewer: "5f5237a4c1beb1523fa3db1f",
-          rating: 3,
-          comment: "Got phone yesterday all ... the charger!",
-          hidden: true,
-        },
-        {
-          reviewer: "5f5237a4c1beb1523fa3db1f",
-          rating: 5,
-          comment: "The charging cable is ... phone was good!",
-          hidden: false,
-        },
-      ],
-    },
+          "reviewer": "5f5237a4c1beb1523fa3db1f",
+          "rating": 3,
+          "comment": "Got phone yesterday all ... the charger!",
+          "hidden": "",
+        }],
+        "disabled": ""
+      },
     {
       id: 2,
       title: "iPhone 12 Pro Max",
@@ -31,7 +27,7 @@ const ViewComments = () => {
       image: "https://example.com/phone2.jpg",
       reviews: [
         {
-          reviewer: "5f5237a4c1beb1523fa3db1f",
+          reviewer: "5f5237a4cfa3db1f",
           rating: 4,
           comment: "Great phone, works perfectly!",
           hidden: false,
