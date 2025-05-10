@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import "./SignIn.css";
 
 const SignIn = ({ onSwitchToSignUp }) => {
@@ -51,13 +52,9 @@ const SignIn = ({ onSwitchToSignUp }) => {
             Forgot password?
           </a>
           <span className="divider">|</span>
-          <button
-            type="button"
-            className="switch-button"
-            onClick={onSwitchToSignUp}
-          >
-            Create Account
-          </button>
+          <p className="signup-link">
+            <Link to="/signup">Create Account</Link>
+          </p>
         </div>
       </form>
     </div>
