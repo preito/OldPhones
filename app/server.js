@@ -22,4 +22,3 @@ app.get('/', (req, res) => {
   res.send('Full Stack App Running');
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
