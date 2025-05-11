@@ -23,6 +23,21 @@ export const CartProvider = ({ children }) => {
     });
   };
 
+  const [wishlistItems, setWishlistItems] = useState([]);
+  const addToWishlist = (phone) => {
+    const key = getPhoneKey(phone);
+    setWishlistItems(prev =>
+      prev.some(item => getPhoneKey(item) === key)
+        ? prev
+        : [...prev, phone]
+    );
+  };
+
+  const removeFromWishlist = (phone) => {
+    const key = getPhoneKey(phone);
+    setWishlistItems(prev => prev.filter(item => getPhoneKey(item) !== key));
+  };
+
   const updateQuantity = (phoneToUpdate, quantity) => {
     const keyToUpdate = getPhoneKey(phoneToUpdate);
     
@@ -47,8 +62,18 @@ export const CartProvider = ({ children }) => {
   };
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, updateQuantity, removeFromCart, clearCart }}>
+    <CartContext.Provider value={{
+      cartItems,
+      addToCart,
+      updateQuantity,
+      removeFromCart,
+      clearCart,
+      wishlistItems,
+      addToWishlist,
+      removeFromWishlist
+    }}>
       {children}
     </CartContext.Provider>
   );
+
 };

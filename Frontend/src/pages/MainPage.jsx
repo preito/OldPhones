@@ -8,9 +8,11 @@ import { CartContext } from '../components/CartContext';
 
 const MainPage = () => {
   const navigate = useNavigate();
-  const { cartItems, addToCart } = useContext(CartContext);
+  const { cartItems, addToCart, wishlistItems, addToWishlist } = useContext(CartContext);
 
   const [viewState, setViewState] = useState('home');
+  const [previousView, setPreviousView] = useState('home');
+
   const [isLoggedIn, setIsLoggedIn] = useState({ id: "5f5237a4c1beb1523fa3da02", name: "Test User" });
   const [soldOutPhones, setSoldOutPhones] = useState([]);
   const [bestSellers, setBestSellers] = useState([]);
@@ -47,6 +49,7 @@ const MainPage = () => {
 
   const handlePhoneClick = (phone) => {
     setSelectedPhone(phone);
+    setPreviousView(viewState);
     setViewState('item');
     setQuantityInput('');
     setShowAllReviews(false);
@@ -95,6 +98,8 @@ const MainPage = () => {
         onLogout={handleLogout}
         onCheckout={() => navigate('/checkout')}
         cartCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+        wishlistCount={wishlistItems.length}
+        onWishlist={() => navigate('/wishlist')}
       />
 
       <div className="content">
@@ -155,6 +160,8 @@ const MainPage = () => {
 
         {viewState === 'item' && selectedPhone && (
           <div className="item-details">
+            <button onClick={() => setViewState(previousView)}>← Back</button>
+
             <h2>{selectedPhone.title}</h2>
             <img
               src={`/images/${selectedPhone.brand}.jpeg`}
@@ -168,6 +175,12 @@ const MainPage = () => {
               <strong>Seller:</strong>{' '}
               {userMap[selectedPhone.seller]?.firstname} {userMap[selectedPhone.seller]?.lastname || 'Unknown Seller'}
             </p>
+            <p><strong>In Cart:</strong> {
+              cartItems.find(item =>
+                `${item.phone.title}_${item.phone.brand}_${item.phone.price}` ===
+                `${selectedPhone.title}_${selectedPhone.brand}_${selectedPhone.price}`
+              )?.quantity || 0
+            }</p>
 
             <h3>Reviews</h3>
             {selectedPhone.reviews
@@ -234,7 +247,10 @@ const MainPage = () => {
               <button onClick={handleAddToCart}>Add to Cart</button>
 
               <h3>Add to Wishlist</h3>
-              <button onClick={() => alert("Added to wishlist!")}>
+              <button onClick={() => {
+                addToWishlist(selectedPhone);
+                alert("Item added to wishlist!");
+              }}>
                 Add to Wishlist
               </button>
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const TopBar = ({ isLoggedIn, onSearch, onLogout, onCheckout, cartCount }) => {
+const TopBar = ({ isLoggedIn, onSearch, onLogout, onCheckout, cartCount, wishlistCount, onWishlist }) => {
   const [searchText, setSearchText] = useState('');
 
   const handleSearch = () => {
@@ -31,6 +31,9 @@ const TopBar = ({ isLoggedIn, onSearch, onLogout, onCheckout, cartCount }) => {
       </div>
 
       <div className="button-group">
+        <button onClick={onWishlist}>
+          Wishlist {wishlistCount > 0 && `(${wishlistCount})`}
+        </button>
         <button onClick={onCheckout}>
           Checkout{cartCount > 0 ? ` (${cartCount})` : ''}
         </button>
