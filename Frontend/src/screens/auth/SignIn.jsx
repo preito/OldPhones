@@ -1,33 +1,28 @@
+// src/pages/SignIn.jsx
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import "./SignIn.css";
-import { checkUserByCredentials } from '../../api/userApi';
 
 const SignIn = ({ onSwitchToSignUp }) => {
+  const navigate = useNavigate();
+  const { login, loading } = useAuth();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleLogin = async () => {
-    try {
-      const response = await checkUserByCredentials(email, password);
-      if (response.data.exists && response.data.match) {
-        console.log("Login successful", response.data.userId);
-      } else if (response.data.exists && !response.data.match) {
-        console.log("Incorrect password");
-      } else {
-        console.log("User not found----");
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-    }
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    handleLogin();
+    setError("");
 
-    // TODO: validate inputs, call your sign-in API, handle errors
-    console.log("Signing in with", { email, password });
+    const { success, message } = await login(email, password);
+
+    if (success) {
+      navigate("/");
+    } else {
+      setError(message);
+    }
   };
 
   return (
@@ -35,12 +30,13 @@ const SignIn = ({ onSwitchToSignUp }) => {
       <form className="signin-input-container" onSubmit={handleSubmit}>
         <h2 className="signin-title">Sign In</h2>
 
+        {error && <p className="error-text">{error}</p>}
+
         <div className="signin-input-item">
           <label htmlFor="email">Email</label>
           <input
             type="email"
             id="email"
-            name="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -53,7 +49,6 @@ const SignIn = ({ onSwitchToSignUp }) => {
           <input
             type="password"
             id="password"
-            name="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -61,18 +56,22 @@ const SignIn = ({ onSwitchToSignUp }) => {
           />
         </div>
 
-        <button type="submit" className="signin-button">
-          Sign In
+        <button
+          type="submit"
+          className="signin-button"
+          disabled={loading}
+        >
+          {loading ? "Signing in…" : "Sign In"}
         </button>
 
         <div className="signin-links">
-          <a href="/reset-password" className="reset-link">
+          <Link to="/reset-password" className="reset-link">
             Forgot password?
-          </a>
+          </Link>
           <span className="divider">|</span>
-          <p className="signup-link">
-            <Link to="/signup">Create Account</Link>
-          </p>
+          <Link to="/signup" className="signup-link">
+            Create Account
+          </Link>
         </div>
       </form>
     </div>

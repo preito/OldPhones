@@ -1,7 +1,21 @@
-import React from "react";
+// src/components/ViewComments.jsx
+import React, { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext";          
 import "./ViewComments.css";
 
 const ViewComments = () => {
+  const { user } = useAuth();                              
+
+  useEffect(() => {
+    if (!user) return;                                      
+    console.log(user);
+  }, [user]);
+
+  if (!user) {
+    return <p>Please sign in to view your comments.</p>;
+  }
+
+
   // Mock data for phone listings with reviews
   const mockListings = [
     {
