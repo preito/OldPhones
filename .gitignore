@@ -9,6 +9,8 @@ node_modules/
 # Production
 /build
 /dist
+frontend/dist
+frontend/.vite
 
 # Environment files
 .env
@@ -50,3 +52,11 @@ local.properties
 .settings/
 .loadpath
 .recommenders
+
+# Local configuration
+*.local
+
+# SSL certificates
+*.pem
+*.key
+*.cert
