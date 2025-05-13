@@ -1,15 +1,16 @@
 import React from 'react';
 
-const PhoneCard = ({ phone, userMap, onClick }) => {
+const PhoneCard = ({ phone, onClick }) => {
   const avgRating =
-    phone.reviews.length > 0
+    phone.reviews?.length > 0
       ? (
           phone.reviews.reduce((s, r) => s + r.rating, 0) / phone.reviews.length
         ).toFixed(1)
       : 'N/A';
 
-  const seller = userMap[phone.seller];
-  const sellerName = seller ? `${seller.firstname} ${seller.lastname}` : 'Unknown Seller';
+  const sellerName = phone.seller
+    ? `${phone.seller.firstname} ${phone.seller.lastname || ''}`
+    : 'Unknown Seller';
 
   return (
     <div className="phone-card" onClick={() => onClick && onClick(phone)}>

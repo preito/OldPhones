@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useContext } from 'react';
-import TopBar from '../components/TopBar';
-import PhoneCard from '../components/PhoneCard';
-import phoneData from '../data/phonelisting.json';
-import userList from '../data/userlist.json';
+import TopBar from '../components/profile/TopBar';
+import PhoneCard from '../components/profile/PhoneCard';
 import { useNavigate } from 'react-router-dom';
-import { CartContext } from '../components/CartContext';
+import { CartContext } from '../components/profile/CartContext';
+
+const API_BASE = import.meta.env.VITE_API_BASE;
 
 const MainPage = () => {
   const navigate = useNavigate();
   const { cartItems, addToCart, wishlistItems, addToWishlist } = useContext(CartContext);
 
+  const [phones, setPhones] = useState([]);
   const [viewState, setViewState] = useState('home');
   const [previousView, setPreviousView] = useState('home');
   const [isLoggedIn, setIsLoggedIn] = useState({ id: "5f5237a4c1beb1523fa3da02", name: "Test User" });
@@ -21,7 +22,6 @@ const MainPage = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [brandFilter, setBrandFilter] = useState('');
   const [maxPrice, setMaxPrice] = useState(2000);
-
   const [tempBrandFilter, setTempBrandFilter] = useState('');
   const [tempMaxPrice, setTempMaxPrice] = useState(2000);
 
@@ -31,14 +31,8 @@ const MainPage = () => {
   const [newComment, setNewComment] = useState('');
   const [newRating, setNewRating] = useState(5);
 
-  const userMap = {};
-  userList.forEach(user => {
-    const id = user._id?.$oid || user._id;
-    userMap[id] = user;
-  });
-
   const handleSearch = (query) => {
-    const results = phoneData.filter(p =>
+    const results = phones.filter(p =>
       p.title.toLowerCase().includes(query.toLowerCase())
     );
     setSearchResults(results);
@@ -63,7 +57,7 @@ const MainPage = () => {
   const handleAddToCart = () => {
     const quantity = Number(quantityInput);
     if (quantity > 0) {
-      addToCart(selectedPhone, quantity);
+      addToCart(selectedPhone, quantity, isLoggedIn.id); 
       alert("Item added to cart!");
       setQuantityInput('');
     }
@@ -71,22 +65,29 @@ const MainPage = () => {
 
   useEffect(() => {
     if (viewState === 'home') {
-      const soldOut = phoneData
-        .filter(p => !p.disabled && p.stock > 0)
-        .sort((a, b) => a.stock - b.stock)
-        .slice(0, 5);
+      fetch(`${API_BASE}/phones`)
+        .then(res => res.json())
+        .then(data => {
+          setPhones(data);
 
-      const best = phoneData
-        .filter(p => !p.disabled && p.reviews.length >= 2)
-        .sort((a, b) => {
-          const avgA = a.reviews.reduce((s, r) => s + r.rating, 0) / a.reviews.length;
-          const avgB = b.reviews.reduce((s, r) => s + r.rating, 0) / b.reviews.length;
-          return avgB - avgA;
+          const soldOut = data
+            .filter(p => !p.disabled && p.stock > 0)
+            .sort((a, b) => a.stock - b.stock)
+            .slice(0, 5);
+
+          const best = data
+            .filter(p => !p.disabled && p.reviews.length >= 2)
+            .sort((a, b) => {
+              const avgA = a.reviews.reduce((s, r) => s + r.rating, 0) / a.reviews.length;
+              const avgB = b.reviews.reduce((s, r) => s + r.rating, 0) / b.reviews.length;
+              return avgB - avgA;
+            })
+            .slice(0, 5);
+
+          setSoldOutPhones(soldOut);
+          setBestSellers(best);
         })
-        .slice(0, 5);
-
-      setSoldOutPhones(soldOut);
-      setBestSellers(best);
+        .catch(err => console.error('Error fetching phones:', err));
     }
   }, [viewState]);
 
@@ -109,14 +110,14 @@ const MainPage = () => {
             <h2>Sold Out Soon</h2>
             <div className="listing-container">
               {soldOutPhones.map(phone => (
-                <PhoneCard key={phone._id} phone={phone} userMap={userMap} onClick={handlePhoneClick} />
+                <PhoneCard key={phone._id} phone={phone} onClick={handlePhoneClick} />
               ))}
             </div>
 
             <h2>Best Sellers</h2>
             <div className="listing-container">
               {bestSellers.map(phone => (
-                <PhoneCard key={phone._id} phone={phone} userMap={userMap} onClick={handlePhoneClick} />
+                <PhoneCard key={phone._id} phone={phone} onClick={handlePhoneClick} />
               ))}
             </div>
           </div>
@@ -160,7 +161,7 @@ const MainPage = () => {
                   phone.price <= maxPrice
                 )
                 .map(phone => (
-                  <PhoneCard key={phone._id} phone={phone} userMap={userMap} onClick={handlePhoneClick} />
+                  <PhoneCard key={phone._id} phone={phone} onClick={handlePhoneClick} />
                 ))}
             </div>
           </div>
@@ -179,10 +180,7 @@ const MainPage = () => {
             <p><strong>Brand:</strong> {selectedPhone.brand}</p>
             <p><strong>Stock:</strong> {selectedPhone.stock}</p>
             <p><strong>Price:</strong> ${selectedPhone.price}</p>
-            <p>
-              <strong>Seller:</strong>{' '}
-              {userMap[selectedPhone.seller]?.firstname} {userMap[selectedPhone.seller]?.lastname || 'Unknown Seller'}
-            </p>
+            <p><strong>Seller:</strong> {selectedPhone.seller?.firstname} {selectedPhone.seller?.lastname || 'Unknown Seller'}</p>
             <p><strong>In Cart:</strong> {
               cartItems.find(item =>
                 `${item.phone.title}_${item.phone.brand}_${item.phone.price}` ===
@@ -197,16 +195,13 @@ const MainPage = () => {
                 const isHidden = hiddenReviewIds.includes(idx);
                 const isLong = review.comment.length > 200;
                 const canHide = isLoggedIn && (
-                  isLoggedIn.id === review.reviewer || isLoggedIn.id === selectedPhone.seller
+                  isLoggedIn.id === review.user?._id || isLoggedIn.id === selectedPhone.seller?._id
                 );
 
                 return (
-                  <div
-                    key={idx}
-                    className={`review-card ${isHidden ? 'hidden-review' : ''}`}
-                  >
+                  <div key={idx} className={`review-card ${isHidden ? 'hidden-review' : ''}`}>
                     <p><strong>
-                      {userMap[review.reviewer]?.firstname} {userMap[review.reviewer]?.lastname || 'Unknown Reviewer'}
+                      {review.user?.firstname} {review.user?.lastname || 'Unknown Reviewer'}
                     </strong></p>
                     <p>Rating: {review.rating}</p>
 
@@ -224,9 +219,7 @@ const MainPage = () => {
                     {canHide && (
                       <button onClick={() => {
                         setHiddenReviewIds(prev =>
-                          prev.includes(idx)
-                            ? prev.filter(i => i !== idx)
-                            : [...prev, idx]
+                          prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]
                         );
                       }}>
                         {isHidden ? 'Show' : 'Hide'}
@@ -234,8 +227,7 @@ const MainPage = () => {
                     )}
                   </div>
                 );
-              })
-            }
+              })}
 
             {selectedPhone.reviews.length > 3 && (
               <button onClick={() => setShowAllReviews(prev => !prev)}>
@@ -256,7 +248,7 @@ const MainPage = () => {
 
               <h3>Add to Wishlist</h3>
               <button onClick={() => {
-                addToWishlist(selectedPhone);
+                addToWishlist(selectedPhone, isLoggedIn.id);
                 alert("Item added to wishlist!");
               }}>
                 Add to Wishlist
@@ -282,10 +274,31 @@ const MainPage = () => {
               </label><br />
 
               <button
-                onClick={() => {
-                  alert('Review submitted (not yet saved)');
-                  setNewComment('');
-                  setNewRating(5);
+                onClick={async () => {
+                  try {
+                    const response = await fetch(`${API_BASE}/phones/${selectedPhone._id}/reviews`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json'
+                      },
+                      body: JSON.stringify({
+                        rating: newRating,
+                        comment: newComment
+                      })
+                    });
+                    if (response.ok) {
+                      const updated = await response.json();
+                      setSelectedPhone(prev => ({ ...prev, reviews: updated.reviews }));
+                      alert('Review submitted!');
+                      setNewComment('');
+                      setNewRating(5);
+                    } else {
+                      alert('Failed to submit review.');
+                    }
+                  } catch (err) {
+                    console.error(err);
+                    alert('Error submitting review.');
+                  }
                 }}
               >
                 Submit Review

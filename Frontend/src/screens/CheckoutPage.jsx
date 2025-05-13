@@ -1,21 +1,25 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CartContext } from '../components/CartContext';
+import { CartContext } from '../components/profile/CartContext';
 
 const getPhoneKey = (phone) => `${phone.title}_${phone.brand}_${phone.price}`;
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
-  const { cartItems, updateQuantity, removeFromCart, clearCart } = useContext(CartContext);
+  const { cartItems, updateQuantity, removeFromCart, clearCart, fetchCart } = useContext(CartContext);
+  const isLoggedIn = { id: "5f5237a4c1beb1523fa3da02", name: "Test User" }; // temp
 
+  useEffect(() => {
+    fetchCart(isLoggedIn.id);
+  }, [fetchCart, isLoggedIn.id]);
   const handleQuantityChange = (phone, value) => {
     const quantity = Math.max(0, parseInt(value) || 0);
-    updateQuantity(phone, quantity);
+    updateQuantity(phone, quantity, isLoggedIn.id);
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     alert('Transaction confirmed!');
-    clearCart();
+    await clearCart(isLoggedIn.id);
     navigate('/');
   };
 
@@ -48,7 +52,7 @@ const CheckoutPage = () => {
                     style={{ marginLeft: '10px', width: '60px' }}
                   />
                 </label>
-                <button onClick={() => removeFromCart(item.phone)}>Remove</button>
+                <button onClick={() => removeFromCart(item.phone, isLoggedIn.id)}>Remove</button>
               </li>
             ))}
           </ul>

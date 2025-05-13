@@ -5,6 +5,18 @@ const userSchema = new mongoose.Schema({
   lastname: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true }, // hashed password
-}, { collection: 'userlist' }); // Use this if your collection name is explicitly `user`
+  wishlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Phone'
+      }
+    ],
+    cart: [
+      {
+          phone: { type: mongoose.Schema.Types.ObjectId, ref: 'Phone' },
+          quantity: { type: Number, default: 1 }
+      }
+    ]
+}, { timestamps: true }); // Use this if your collection name is explicitly `user`
 
 module.exports = mongoose.model('User', userSchema);
