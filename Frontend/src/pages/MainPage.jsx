@@ -12,8 +12,8 @@ const MainPage = () => {
 
   const [viewState, setViewState] = useState('home');
   const [previousView, setPreviousView] = useState('home');
-
   const [isLoggedIn, setIsLoggedIn] = useState({ id: "5f5237a4c1beb1523fa3da02", name: "Test User" });
+
   const [soldOutPhones, setSoldOutPhones] = useState([]);
   const [bestSellers, setBestSellers] = useState([]);
   const [selectedPhone, setSelectedPhone] = useState(null);
@@ -24,7 +24,6 @@ const MainPage = () => {
 
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [hiddenReviewIds, setHiddenReviewIds] = useState([]);
-
   const [quantityInput, setQuantityInput] = useState('');
   const [newComment, setNewComment] = useState('');
   const [newRating, setNewRating] = useState(5);
@@ -61,12 +60,11 @@ const MainPage = () => {
   const handleAddToCart = () => {
     const quantity = Number(quantityInput);
     if (quantity > 0) {
-      addToCart(selectedPhone, quantity); 
+      addToCart(selectedPhone, quantity);
       alert("Item added to cart!");
       setQuantityInput('');
     }
-  };  
-  
+  };
 
   useEffect(() => {
     if (viewState === 'home') {
