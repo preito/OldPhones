@@ -22,6 +22,9 @@ const MainPage = () => {
   const [brandFilter, setBrandFilter] = useState('');
   const [maxPrice, setMaxPrice] = useState(2000);
 
+  const [tempBrandFilter, setTempBrandFilter] = useState('');
+  const [tempMaxPrice, setTempMaxPrice] = useState(2000);
+
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [hiddenReviewIds, setHiddenReviewIds] = useState([]);
   const [quantityInput, setQuantityInput] = useState('');
@@ -124,23 +127,30 @@ const MainPage = () => {
             <h2>Search Results</h2>
             <div className="filter-bar">
               <label>Filter by Brand: </label>
-              <select value={brandFilter} onChange={(e) => setBrandFilter(e.target.value)}>
+              <select value={tempBrandFilter} onChange={(e) => setTempBrandFilter(e.target.value)}>
                 <option value="">All</option>
                 <option value="Apple">Apple</option>
                 <option value="Samsung">Samsung</option>
-                <option value="Google">Google</option>
+                <option value="Nokia">Nokia</option>
               </select>
 
-              <label>Max Price: </label>
+              <label style={{ marginLeft: '20px' }}>Max Price: </label>
               <input
                 type="range"
                 min="0"
                 max="2000"
                 step="100"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(Number(e.target.value))}
+                value={tempMaxPrice}
+                onChange={(e) => setTempMaxPrice(Number(e.target.value))}
               />
-              <span>${maxPrice}</span>
+              <span>${tempMaxPrice}</span>
+
+              <button style={{ marginLeft: '20px' }} onClick={() => {
+                setBrandFilter(tempBrandFilter);
+                setMaxPrice(tempMaxPrice);
+              }}>
+                Filter
+              </button>
             </div>
 
             <div className="listing-container">
