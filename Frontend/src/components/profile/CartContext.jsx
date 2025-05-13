@@ -5,6 +5,8 @@ export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
+
+  const getPhoneKey = (phone) => `${phone.title}_${phone.brand}_${phone.price}`;
   const [wishlistItems, setWishlistItems] = useState([]);
 
   const getPhoneKey = (phone) => `${phone.title}_${phone.brand}_${phone.price}`;
@@ -14,6 +16,7 @@ export const CartProvider = ({ children }) => {
       const key = getPhoneKey(phone);
       const existing = prev.find(item => getPhoneKey(item.phone) === key);
 
+  
       if (existing) {
         return prev.map(item =>
           getPhoneKey(item.phone) === key
@@ -21,14 +24,12 @@ export const CartProvider = ({ children }) => {
             : item
         );
       }
-
       return [...prev, { phone, quantity }];
     });
   };
 
   const updateQuantity = (phoneToUpdate, quantity) => {
     const keyToUpdate = getPhoneKey(phoneToUpdate);
-
     if (quantity <= 0) {
       setCartItems(prev => prev.filter(item => getPhoneKey(item.phone) !== keyToUpdate));
     } else {
@@ -49,6 +50,8 @@ export const CartProvider = ({ children }) => {
     setCartItems([]);
   };
 
+  return (
+    <CartContext.Provider value={{ cartItems, addToCart, updateQuantity, removeFromCart, clearCart }}>
   const addToWishlist = (phone) => {
     const key = getPhoneKey(phone);
     setWishlistItems(prev =>
