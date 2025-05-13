@@ -1,13 +1,31 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./SignIn.css";
+import { checkUserByCredentials } from '../../api/userApi';
 
 const SignIn = ({ onSwitchToSignUp }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const handleLogin = async () => {
+    try {
+      const response = await checkUserByCredentials(email, password);
+      if (response.data.exists && response.data.match) {
+        console.log("Login successful", response.data.userId);
+      } else if (response.data.exists && !response.data.match) {
+        console.log("Incorrect password");
+      } else {
+        console.log("User not found----");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    handleLogin();
+
     // TODO: validate inputs, call your sign-in API, handle errors
     console.log("Signing in with", { email, password });
   };
