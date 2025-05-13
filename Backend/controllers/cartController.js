@@ -2,7 +2,7 @@ import User from '../models/User.js';
 import Phone from '../models/Phone.js';
 
 // Add or update item in cart
-export const addToCart = async (req, res) => {
+exports.addToCart = async (req, res) => {
   const { userId, phoneId, quantity } = req.body;
 
   try {
@@ -25,7 +25,7 @@ export const addToCart = async (req, res) => {
 };
 
 // Get user’s cart
-export const getCart = async (req, res) => {
+exports.getCart = async (req, res) => {
   const { userId } = req.params;
 
   try {
@@ -39,7 +39,7 @@ export const getCart = async (req, res) => {
 };
 
 // Remove item from cart
-export const removeFromCart = async (req, res) => {
+exports.removeFromCart = async (req, res) => {
   const { userId, phoneId } = req.body;
 
   try {

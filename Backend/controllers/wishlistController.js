@@ -2,7 +2,7 @@ import User from '../models/User.js';
 import Phone from '../models/Phone.js';
 
 // Add phone to user's wishlist
-export const addToWishlist = async (req, res) => {
+exports.addToWishlist = async (req, res) => {
   const { userId, phoneId } = req.body;
 
   try {
@@ -22,7 +22,7 @@ export const addToWishlist = async (req, res) => {
 };
 
 // Get user's wishlist
-export const getWishlist = async (req, res) => {
+exports.getWishlist = async (req, res) => {
   const { userId } = req.params;
 
   try {
@@ -36,7 +36,7 @@ export const getWishlist = async (req, res) => {
 };
 
 // Remove phone from user's wishlist
-export const removeFromWishlist = async (req, res) => {
+exports.removeFromWishlist = async (req, res) => {
   const { userId, phoneId } = req.body;
 
   try {

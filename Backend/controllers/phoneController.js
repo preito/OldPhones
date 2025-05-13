@@ -13,7 +13,7 @@ module.exports.getPhones = async (req, res) => {
 };
 
 
-export const getPhoneSeller = async (req, res) => {
+module.exports.getPhoneSeller = async (req, res) => {
   try {
     const phones = await Phone.find().populate('seller', 'firstname lastname email');
     res.status(200).json(phones);
@@ -23,7 +23,7 @@ export const getPhoneSeller = async (req, res) => {
 };
 
 
-export const getPhoneById = async (req, res) => {
+module.exports.getPhoneById = async (req, res) => {
   try {
     const phone = await Phone.findById(req.params.id).populate('seller', 'firstname lastname email');
 

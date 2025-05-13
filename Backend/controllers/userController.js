@@ -30,7 +30,7 @@ exports.checkUserByCredentials = async (req, res) => {
   }
 };
 
-export const getUsers = async (req, res) => {
+exports.getUsers = async (req, res) => {
   try {
     const users = await User.find().select('-password'); // exclude password
     res.status(200).json(users);
@@ -42,7 +42,7 @@ export const getUsers = async (req, res) => {
 // @desc    Get user by ID
 // @route   GET /api/users/:id
 // @access  Public (for now)
-export const getUserById = async (req, res) => {
+exports.getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select('-password');
 
