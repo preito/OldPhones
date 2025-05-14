@@ -2,15 +2,13 @@ import React, { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CartContext } from '../components/profile/CartContext';
 
-const API_BASE = import.meta.env.VITE_API_BASE;
-
 const Wishlist = () => {
   const navigate = useNavigate();
   const { wishlistItems, setWishlistItems, removeFromWishlist, addToCart } = useContext(CartContext);
   const isLoggedIn = { id: "5f5237a4c1beb1523fa3da02", name: "Test User" }; // Replace with real auth later
 
   useEffect(() => {
-    fetch(`${API_BASE}/wishlist/${isLoggedIn.id}`)
+    fetch(`/api/wishlist/${isLoggedIn.id}`)
       .then(res => res.json())
       .then(data => {
         setWishlistItems(data);

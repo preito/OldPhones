@@ -40,4 +40,9 @@ router.get('/api/wishlist/:userId', wishlistController.getWishlist);
 
 router.delete('/api/wishlist', wishlistController.removeFromWishlist);
 
+// Add a new review to a phone
+router.post('/api/phone/:phoneId/reviews', phoneController.addReview);
+
+// get reviews with reviewer info
+router.get('/api/phone/:phoneId/reviews', phoneController.reviewerInfo);
 module.exports = router;

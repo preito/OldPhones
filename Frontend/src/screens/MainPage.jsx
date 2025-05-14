@@ -3,8 +3,7 @@ import TopBar from '../components/profile/TopBar';
 import PhoneCard from '../components/profile/PhoneCard';
 import { useNavigate } from 'react-router-dom';
 import { CartContext } from '../components/profile/CartContext';
-
-const API_BASE = import.meta.env.VITE_API_BASE;
+import { useAuth } from '../context/AuthContext'; 
 
 const MainPage = () => {
   const navigate = useNavigate();
@@ -13,8 +12,8 @@ const MainPage = () => {
   const [phones, setPhones] = useState([]);
   const [viewState, setViewState] = useState('home');
   const [previousView, setPreviousView] = useState('home');
-  const [isLoggedIn, setIsLoggedIn] = useState({ id: "5f5237a4c1beb1523fa3da02", name: "Test User" });
-
+  const { user, logout, loading } = useAuth();
+  
   const [soldOutPhones, setSoldOutPhones] = useState([]);
   const [bestSellers, setBestSellers] = useState([]);
   const [selectedPhone, setSelectedPhone] = useState(null);
@@ -41,7 +40,7 @@ const MainPage = () => {
     setViewState('search');
   };
 
-  const handleLogout = () => setIsLoggedIn(false);
+  const handleLogout = () => logout();
 
   const handlePhoneClick = (phone) => {
     setSelectedPhone(phone);
@@ -57,7 +56,7 @@ const MainPage = () => {
   const handleAddToCart = () => {
     const quantity = Number(quantityInput);
     if (quantity > 0) {
-      addToCart(selectedPhone, quantity, isLoggedIn.id); 
+      addToCart(selectedPhone, quantity, user?.id); 
       alert("Item added to cart!");
       setQuantityInput('');
     }
@@ -91,11 +90,18 @@ const MainPage = () => {
     }
   }, [viewState]);
 
-  return (
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  return(
     <div>
       <TopBar
         viewState={viewState}
-        isLoggedIn={isLoggedIn}
         onSearch={handleSearch}
         onLogout={handleLogout}
         onCheckout={() => navigate('/checkout')}
@@ -194,9 +200,8 @@ const MainPage = () => {
               .map((review, idx) => {
                 const isHidden = hiddenReviewIds.includes(idx);
                 const isLong = review.comment.length > 200;
-                const canHide = isLoggedIn && (
-                  isLoggedIn.id === review.user?._id || isLoggedIn.id === selectedPhone.seller?._id
-                );
+                const canHide = user?.id === review.user?._id || user?.id === selectedPhone.seller?._id;
+
 
                 return (
                   <div key={idx} className={`review-card ${isHidden ? 'hidden-review' : ''}`}>
@@ -248,7 +253,7 @@ const MainPage = () => {
 
               <h3>Add to Wishlist</h3>
               <button onClick={() => {
-                addToWishlist(selectedPhone, isLoggedIn.id);
+                addToWishlist(selectedPhone, user.id);
                 alert("Item added to wishlist!");
               }}>
                 Add to Wishlist
@@ -276,7 +281,7 @@ const MainPage = () => {
               <button
                 onClick={async () => {
                   try {
-                    const response = await fetch(`${API_BASE}/phones/${selectedPhone._id}/reviews`, {
+                    const response = await fetch(`/api/phone/${selectedPhone._id}/reviews`, {
                       method: 'POST',
                       headers: {
                         'Content-Type': 'application/json'
