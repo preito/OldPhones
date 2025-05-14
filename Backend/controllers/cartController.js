@@ -1,8 +1,7 @@
-import User from '../models/User.js';
-import Phone from '../models/Phone.js';
+const User = require('../models/User');
 
 // Add or update item in cart
-exports.addToCart = async (req, res) => {
+module.exports.addToCart = async (req, res) => {
   const { userId, phoneId, quantity } = req.body;
 
   try {
@@ -25,7 +24,7 @@ exports.addToCart = async (req, res) => {
 };
 
 // Get user’s cart
-exports.getCart = async (req, res) => {
+module.exports.getCart = async (req, res) => {
   const { userId } = req.params;
 
   try {

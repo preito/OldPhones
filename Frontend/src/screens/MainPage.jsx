@@ -65,7 +65,7 @@ const MainPage = () => {
 
   useEffect(() => {
     if (viewState === 'home') {
-      fetch(`${API_BASE}/phones`)
+      fetch(`/api/phone/getPhoneSeller`)
         .then(res => res.json())
         .then(data => {
           setPhones(data);
