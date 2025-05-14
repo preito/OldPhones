@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 
 const MainPage = () => {
   const navigate = useNavigate();
-  const { cartItems, addToCart, wishlistItems, addToWishlist } = useContext(CartContext);
+  const { cartItems, addToCart, wishlistItems, addToWishlist, fetchCart } = useContext(CartContext);
 
   const [phones, setPhones] = useState([]);
   const [viewState, setViewState] = useState('home');
@@ -53,10 +53,11 @@ const MainPage = () => {
     setNewRating(5);
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     const quantity = Number(quantityInput);
     if (quantity > 0) {
-      addToCart(selectedPhone, quantity, user?.id); 
+      await addToCart(selectedPhone, quantity, user?._id);
+      await fetchCart(user?._id); 
       alert("Item added to cart!");
       setQuantityInput('');
     }
@@ -200,16 +201,15 @@ const MainPage = () => {
               .map((review, idx) => {
                 const isHidden = hiddenReviewIds.includes(idx);
                 const isLong = review.comment.length > 200;
-                const canHide = user?.id === review.user?._id || user?.id === selectedPhone.seller?._id;
+                const canHide = user?._id === review.reviewer?._id || user?._id === selectedPhone.seller?._id;
 
 
                 return (
                   <div key={idx} className={`review-card ${isHidden ? 'hidden-review' : ''}`}>
                     <p><strong>
-                      {review.user?.firstname} {review.user?.lastname || 'Unknown Reviewer'}
+                      {review.reviewer?.firstname} {review.reviewer?.lastname || 'Unknown Reviewer'}
                     </strong></p>
                     <p>Rating: {review.rating}</p>
-
                     {isLong ? (
                       <p>
                         {review.comment.slice(0, 200)}...
@@ -253,7 +253,7 @@ const MainPage = () => {
 
               <h3>Add to Wishlist</h3>
               <button onClick={() => {
-                addToWishlist(selectedPhone, user.id);
+                addToWishlist(selectedPhone, user._id);
                 alert("Item added to wishlist!");
               }}>
                 Add to Wishlist

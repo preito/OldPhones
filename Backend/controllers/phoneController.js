@@ -15,7 +15,9 @@ module.exports.getPhones = async (req, res) => {
 
 module.exports.getPhoneSeller = async (req, res) => {
   try {
-    const phones = await Phone.find().populate('seller', 'firstname lastname email');
+    const phones = await Phone.find()
+    .populate('seller', 'firstname lastname email')
+    .populate('reviews.reviewer', 'firstname lastname');
     res.status(200).json(phones);
   } catch (error) {
     res.status(500).json({ message: 'Server error: ' + error.message });
@@ -25,7 +27,9 @@ module.exports.getPhoneSeller = async (req, res) => {
 
 module.exports.getPhoneById = async (req, res) => {
   try {
-    const phone = await Phone.findById(req.params.id).populate('seller', 'firstname lastname email');
+    const phone = await Phone.findById(req.params.id)
+    .populate('reviews.reviewer', 'firstname lastname')
+    .populate('seller', 'firstname lastname email');
 
     if (!phone) {
       return res.status(404).json({ message: 'Phone not found' });
@@ -72,7 +76,8 @@ module.exports.addReview = async (req, res) => {
 
 module.exports.reviewerInfo = async (req, res) => {
   try {
-    const phone = await Phone.findById(req.params.phoneId).populate('reviews.user', 'firstname lastname');
+    const phone = await Phone.findById(req.params.phoneId)
+    .populate('reviews.reviewer', 'firstname lastname');
     if (!phone) {
       return res.status(404).json({ message: 'Phone not found' });
     }

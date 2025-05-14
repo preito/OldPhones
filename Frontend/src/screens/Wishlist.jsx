@@ -1,21 +1,31 @@
 import React, { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CartContext } from '../components/profile/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 const Wishlist = () => {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
   const { wishlistItems, setWishlistItems, removeFromWishlist, addToCart } = useContext(CartContext);
-  const isLoggedIn = { id: "5f5237a4c1beb1523fa3da02", name: "Test User" }; // Replace with real auth later
 
   useEffect(() => {
-    fetch(`/api/wishlist/${isLoggedIn.id}`)
-      .then(res => res.json())
-      .then(data => {
-        setWishlistItems(data);
-      })
-      .catch(err => console.error('Error loading wishlist:', err));
-  }, [isLoggedIn.id, setWishlistItems]);
-  
+    if (user?._id) {
+      fetch(`/api/wishlist/${user._id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setWishlistItems(data);
+          } else {
+            console.error("Wishlist response is not an array:", data);
+          }
+        })
+        .catch(err => console.error('Error loading wishlist:', err));
+    }
+  }, [user?._id, setWishlistItems]);
+
+  if (loading) return <div style={{ padding: '2rem' }}>Loading...</div>;
+  if (!user) return <div style={{ padding: '2rem' }}>You must be logged in to view your wishlist.</div>;
+
   return (
     <div className="wishlist-page">
       <h2>Wishlist</h2>
@@ -25,28 +35,33 @@ const Wishlist = () => {
         <p>Your wishlist is empty.</p>
       ) : (
         <ul>
-          {wishlistItems.map((item, index) => (
-            <li key={index} style={{ marginBottom: '20px', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
-              <h4>{item.title}</h4>
-              <p>Brand: {item.brand}</p>
-              <p>Price: ${item.price}</p>
-              <p>Stock: {item.stock}</p>
-              <button
-                onClick={() => {
-                  addToCart(item, 1, isLoggedIn.id);
-                  alert("Item added to cart!");
-                }}
-              >
-                Add to Cart
-              </button>
-              <button
-                style={{ marginLeft: '10px' }}
-                onClick={() => removeFromWishlist(item, isLoggedIn.id)}
-              >
-                Remove from Wishlist
-              </button>
-            </li>
-          ))}
+          {wishlistItems.map((item, index) => {
+            if (!item || !item.title) return null; 
+            return (
+              <li key={index} style={{ marginBottom: '20px', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
+                <h4>{item.title}</h4>
+                <p>Brand: {item.brand}</p>
+                <p>Price: ${item.price}</p>
+                <p>Stock: {item.stock}</p>
+                <button
+                  onClick={() => {
+                    if (user?._id) {
+                      addToCart(item, 1, user._id);
+                      alert("Item added to cart!");
+                    }
+                  }}
+                >
+                  Add to Cart
+                </button>
+                <button
+                  style={{ marginLeft: '10px' }}
+                  onClick={() => user?._id && removeFromWishlist(item, user._id)}
+                >
+                  Remove from Wishlist
+                </button>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
