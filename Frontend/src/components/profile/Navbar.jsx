@@ -1,5 +1,7 @@
+// src/components/Navbar.jsx
 import React from "react";
 import "./Navbar.css";
+import LogoutButton from "../auth/LogoutButton";  
 
 const Navbar = ({ setActiveTab }) => {
   return (
@@ -17,6 +19,8 @@ const Navbar = ({ setActiveTab }) => {
             Manage Listings
           </button>
           <button onClick={() => setActiveTab("view")}>View Comments</button>
+
+          <LogoutButton>Log Out</LogoutButton>
         </ul>
       </nav>
     </header>
