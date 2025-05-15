@@ -18,7 +18,9 @@ exports.login = async (req, res) => {
 
     // attach user to session
     req.session.user = { id: user._id, email: user.email };
-    res.json({ message: "Logged in" });
+    res.json({ message: 'Logged in',
+    user: user
+   })
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ message: 'Server error.' });
