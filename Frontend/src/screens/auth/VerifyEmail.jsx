@@ -21,7 +21,7 @@ export default function VerifyEmail() {
         if (/already verified/i.test(msg)) {
           setStatus("Your email is already verified. Redirecting to sign in…");
         } else {
-          setStatus("Yay! Your email has been verified. Redirecting to sign in…");
+          setStatus("Your email has been verified! Redirecting to sign in…");
         }
       })
       .catch((error) => {
