@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import TopBar from '../components/profile/TopBar';
 import PhoneCard from '../components/profile/PhoneCard';
 import { useNavigate } from 'react-router-dom';
-import { CartContext } from '../components/profile/CartContext';
+import { CartContext } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext'; 
 
 const MainPage = () => {
@@ -54,10 +54,15 @@ const MainPage = () => {
   };
 
   const handleAddToCart = async () => {
+    if (!user) {
+      alert("Please sign in to add items to your cart.");
+      return;
+    }
+
     const quantity = Number(quantityInput);
     if (quantity > 0) {
-      await addToCart(selectedPhone, quantity, user?._id);
-      await fetchCart(user?._id); 
+      await addToCart(selectedPhone, quantity, user._id);
+      await fetchCart(user._id); 
       alert("Item added to cart!");
       setQuantityInput('');
     }
@@ -253,6 +258,12 @@ const MainPage = () => {
 
               <h3>Add to Wishlist</h3>
               <button onClick={() => {
+                if (!user) {
+                  alert("Please sign in to add items to your wishlist.");
+                  navigate("/signin");
+                  return;
+                }
+
                 addToWishlist(selectedPhone, user._id);
                 alert("Item added to wishlist!");
               }}>
@@ -280,6 +291,11 @@ const MainPage = () => {
 
               <button
                 onClick={async () => {
+                  if (!user) {
+                    alert("Please sign in to submit a review.");
+                    return;
+                  }
+
                   try {
                     const response = await fetch(`/api/phone/${selectedPhone._id}/reviews`, {
                       method: 'POST',
@@ -291,14 +307,24 @@ const MainPage = () => {
                         comment: newComment
                       })
                     });
+
                     if (response.ok) {
-                      const updated = await response.json();
-                      setSelectedPhone(prev => ({ ...prev, reviews: updated.reviews }));
+                      const data = await response.json();
+
+                      // update entire selectedPhone with new reviews
+                      setSelectedPhone(prev => ({
+                        ...prev,
+                        reviews: data.reviews,
+                        rating:
+                          data.reviews.reduce((acc, r) => acc + r.rating, 0) / data.reviews.length,
+                      }));
+
                       alert('Review submitted!');
                       setNewComment('');
                       setNewRating(5);
                     } else {
-                      alert('Failed to submit review.');
+                      const errorData = await response.json();
+                      alert(errorData.message || 'Failed to submit review.');
                     }
                   } catch (err) {
                     console.error(err);

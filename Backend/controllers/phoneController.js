@@ -43,7 +43,7 @@ module.exports.getPhoneById = async (req, res) => {
 
 module.exports.addReview = async (req, res) => {
   const { rating, comment } = req.body;
-  const userId = req.user?._id; // assumes user is authenticated and middleware sets req.user
+  const userId = req.user?._id;
 
   if (!userId) {
     return res.status(401).json({ message: 'Unauthorized. User not logged in.' });
@@ -55,22 +55,43 @@ module.exports.addReview = async (req, res) => {
       return res.status(404).json({ message: 'Phone not found' });
     }
 
-    const user = await User.findById(userId).select('firstname lastname');
+    // (Optional) Check if user already reviewed
+    const alreadyReviewed = phone.reviews.find(
+      (rev) => rev.reviewer.toString() === userId.toString()
+    );
+    if (alreadyReviewed) {
+      return res.status(400).json({ message: 'You have already submitted a review for this phone.' });
+    }
 
     const newReview = {
-      name: `${user.firstname} ${user.lastname}`,
+      reviewer: userId, 
       rating: Number(rating),
       comment,
-      user: userId
     };
 
     phone.reviews.push(newReview);
-    phone.rating = phone.reviews.reduce((acc, r) => acc + r.rating, 0) / phone.reviews.length;
+
+    // Update average rating
+    phone.rating =
+      phone.reviews.reduce((acc, r) => acc + r.rating, 0) / phone.reviews.length;
 
     await phone.save();
-    res.status(201).json({ message: 'Review added successfully', reviews: phone.reviews });
+
+    // Re-fetch with populated reviewer info
+    const updatedPhone = await Phone.findById(req.params.phoneId).populate(
+      'reviews.reviewer',
+      'firstname lastname'
+    );
+
+    res.status(201).json({
+      message: 'Review added successfully',
+      reviews: updatedPhone.reviews,
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error adding review', error: error.message });
+    res.status(500).json({
+      message: 'Error adding review',
+      error: error.message,
+    });
   }
 };
 
