@@ -110,7 +110,7 @@ exports.register = async (req, res) => {
 exports.verifyEmail = async (req, res) => {
   try {
     const { token, email } = req.query;
-    console.log('🔍 verifyEmail called with:', { token, email });
+    console.log('verifyEmail called with:', { token, email });
 
     if (!token || !email) {
       return res.status(400).send('Invalid verification link.');
@@ -119,13 +119,13 @@ exports.verifyEmail = async (req, res) => {
     // 1) lookup by email only
     const user = await User.findOne({ email });
     if (!user) {
-      console.log('❌ No such user for email:', email);
+      console.log('No such user for email:', email);
       return res.status(400).send('Invalid verification link.');
     }
 
     // 2) if already verified, succeed
     if (user.verified) {
-      console.log('ℹ️  User already verified:', email);
+      console.log('User already verified:', email);
       return res.send('Email already verified; you can sign in.');
     }
 
@@ -136,7 +136,7 @@ exports.verifyEmail = async (req, res) => {
       !user.verificationTokenExpires ||
       user.verificationTokenExpires < now
     ) {
-      console.log('❌ Token mismatch or expired:', {
+      console.log('Token mismatch or expired:', {
         tokenStored: user.verificationToken,
         expires:     user.verificationTokenExpires,
         now,
@@ -149,7 +149,7 @@ exports.verifyEmail = async (req, res) => {
     user.verificationToken = undefined;
     user.verificationTokenExpires = undefined;
     await user.save();
-    console.log('✅ Email verified for:', email);
+    console.log('Email verified for:', email);
 
     return res.send('Email verified! You can now sign in.');
   } catch (err) {
