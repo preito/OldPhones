@@ -1,46 +1,99 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../context/AuthContext";
 import "./EditProfile.css";
 
-const EditProfile = () => {
-  return (
+export default function EditProfile() {
+  const { user, loading } = useAuth();
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+  });
 
-    <div className="edit-profile-container">
+  useEffect(() => {
+    if (!loading && user) {
+      setFormData({
+        firstName: user.firstname || "",
+        lastName: user.lastname || "",
+        email: user.email || "",
+        password: "",
+      });
+    }
+  }, [loading, user]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((fd) => ({ ...fd, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // TODO: call update-profile API with formData
+    console.log("Update profile with:", formData);
+  };
+
+  if (loading) {
+    return <div>Loading profile…</div>;
+  }
+
+  return (
+    <form className="edit-profile-container" onSubmit={handleSubmit}>
       <h2>Edit Profile</h2>
       <div className="edit-profile-input-container">
         <div className="edit-profile-input-item">
-          <label>First Name</label>
+          <label htmlFor="firstName">First Name</label>
           <input
             type="text"
             id="firstName"
             name="firstName"
-            value="Prefilled value"
+            value={formData.firstName}
+            onChange={handleChange}
+            required
           />
         </div>
+
         <div className="edit-profile-input-item">
-          <label>Last Name</label>
+          <label htmlFor="lastName">Last Name</label>
           <input
             type="text"
             id="lastName"
             name="lastName"
-            value="Prefilled value"
+            value={formData.lastName}
+            onChange={handleChange}
+            required
           />
         </div>
+
         <div className="edit-profile-input-item">
-          <label>Email</label>
-          <input type="email" id="email" name="email" value="Prefilled value" />
+          <label htmlFor="email">Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
         </div>
+
         <div className="edit-profile-input-item">
-          <label>Password</label>
+          <label htmlFor="password">Current Password</label>
           <input
             type="password"
             id="password"
             name="password"
-            value="Prefilled pass"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="Enter current password"
+            required
           />
         </div>
       </div>
-      <button className="edit-profile-button">Update profile</button>
-    </div>
+
+      <button type="submit" className="edit-profile-button">
+        Update Profile
+      </button>
+    </form>
   );
-};
-export default EditProfile;
+}

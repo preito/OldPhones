@@ -11,9 +11,8 @@ import EmailSent from "./screens/auth/EmailSent";
 import VerifyEmail from "./screens/auth/VerifyEmail";
 import ForgotPassword from "./screens/auth/ForgotPassword";
 import ResetPassword from "./screens/auth/ResetPassword";
-
+import ProtectedRoute from './components/protectedRoutes/ProtectedProfileRoute';
 import Admin from "./screens/Admin";
-
 
 function App() {
   return (
@@ -22,10 +21,17 @@ function App() {
         <Router>
           <div className="app">
             <Routes>
-              <Route path="/profile" element={<Profile />} />
+              <Route path="/" element={<MainPage />} />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/signin" element={<SignIn />} />
               <Route path="/signup" element={<SignUp />} />
-              <Route path="/" element={<MainPage />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/wishlist" element={<Wishlist />} />
