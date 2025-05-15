@@ -10,6 +10,7 @@ import Wishlist from "./screens/Wishlist";
 import EmailSent from "./screens/auth/EmailSent";
 import VerifyEmail from "./screens/auth/VerifyEmail";
 
+import Admin from "./screens/Admin";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
               <Route path="/signin" element={<SignIn />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/" element={<MainPage />} />
+              <Route path="/admin" element={<Admin />} />
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/email-sent" element={<EmailSent />} />
