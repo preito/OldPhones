@@ -2,7 +2,8 @@
  * USYD COMP5347 Assignment 2 - Mobile Website
  * Created 10th May 2025
  */
-
+const User = require("./models/User");
+const bcrypt = require("bcrypt");
 const express = require("express");
 const session = require("express-session");
 const path = require("path");
@@ -41,6 +42,29 @@ app.use("/", authRoutes);
 app.use("/", routes);
 app.use("/admin", adminRoutes);  // separate admin route
 
+async function ensureSuperAdmin() {
+  try {
+    const existing = await User.findOne({ sadmin: true });
+    if (!existing) {
+      const hashed = await bcrypt.hash("Admin@1234", 10); // Choose a secure password
+      const admin = new User({
+        firstname: "Super",
+        lastname: "Admin",
+        email: "admin@oldphonedeals.com",
+        password: hashed,
+        sadmin: true,
+      });
+      await admin.save();
+      console.log("✅ Super admin account created.");
+    } else {
+      console.log("🔒 Super admin already exists.");
+    }
+  } catch (err) {
+    console.error("❌ Failed to create super admin:", err);
+  }
+}
+
+ensureSuperAdmin();
 
 app.listen(PORT, function () {
   console.log("Application is listening on url http://localhost:" + PORT + "/");
