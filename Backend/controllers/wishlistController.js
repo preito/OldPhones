@@ -1,8 +1,7 @@
-import User from '../models/User.js';
-import Phone from '../models/Phone.js';
+const User = require('../models/User');
 
 // Add phone to user's wishlist
-exports.addToWishlist = async (req, res) => {
+module.exports.addToWishlist = async (req, res) => {
   const { userId, phoneId } = req.body;
 
   try {
@@ -22,7 +21,7 @@ exports.addToWishlist = async (req, res) => {
 };
 
 // Get user's wishlist
-exports.getWishlist = async (req, res) => {
+module.exports.getWishlist = async (req, res) => {
   const { userId } = req.params;
 
   try {
@@ -36,7 +35,7 @@ exports.getWishlist = async (req, res) => {
 };
 
 // Remove phone from user's wishlist
-exports.removeFromWishlist = async (req, res) => {
+module.exports.removeFromWishlist = async (req, res) => {
   const { userId, phoneId } = req.body;
 
   try {

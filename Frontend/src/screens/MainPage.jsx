@@ -3,18 +3,17 @@ import TopBar from '../components/profile/TopBar';
 import PhoneCard from '../components/profile/PhoneCard';
 import { useNavigate } from 'react-router-dom';
 import { CartContext } from '../components/profile/CartContext';
-
-const API_BASE = import.meta.env.VITE_API_BASE;
+import { useAuth } from '../context/AuthContext'; 
 
 const MainPage = () => {
   const navigate = useNavigate();
-  const { cartItems, addToCart, wishlistItems, addToWishlist } = useContext(CartContext);
+  const { cartItems, addToCart, wishlistItems, addToWishlist, fetchCart } = useContext(CartContext);
 
   const [phones, setPhones] = useState([]);
   const [viewState, setViewState] = useState('home');
   const [previousView, setPreviousView] = useState('home');
-  const [isLoggedIn, setIsLoggedIn] = useState({ id: "5f5237a4c1beb1523fa3da02", name: "Test User" });
-
+  const { user, logout, loading } = useAuth();
+  
   const [soldOutPhones, setSoldOutPhones] = useState([]);
   const [bestSellers, setBestSellers] = useState([]);
   const [selectedPhone, setSelectedPhone] = useState(null);
@@ -41,7 +40,7 @@ const MainPage = () => {
     setViewState('search');
   };
 
-  const handleLogout = () => setIsLoggedIn(false);
+  const handleLogout = () => logout();
 
   const handlePhoneClick = (phone) => {
     setSelectedPhone(phone);
@@ -54,10 +53,11 @@ const MainPage = () => {
     setNewRating(5);
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     const quantity = Number(quantityInput);
     if (quantity > 0) {
-      addToCart(selectedPhone, quantity, isLoggedIn.id); 
+      await addToCart(selectedPhone, quantity, user?._id);
+      await fetchCart(user?._id); 
       alert("Item added to cart!");
       setQuantityInput('');
     }
@@ -65,7 +65,7 @@ const MainPage = () => {
 
   useEffect(() => {
     if (viewState === 'home') {
-      fetch(`${API_BASE}/phones`)
+      fetch(`/api/phone/getPhoneSeller`)
         .then(res => res.json())
         .then(data => {
           setPhones(data);
@@ -91,11 +91,18 @@ const MainPage = () => {
     }
   }, [viewState]);
 
-  return (
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  return(
     <div>
       <TopBar
         viewState={viewState}
-        isLoggedIn={isLoggedIn}
         onSearch={handleSearch}
         onLogout={handleLogout}
         onCheckout={() => navigate('/checkout')}
@@ -194,17 +201,15 @@ const MainPage = () => {
               .map((review, idx) => {
                 const isHidden = hiddenReviewIds.includes(idx);
                 const isLong = review.comment.length > 200;
-                const canHide = isLoggedIn && (
-                  isLoggedIn.id === review.user?._id || isLoggedIn.id === selectedPhone.seller?._id
-                );
+                const canHide = user?._id === review.reviewer?._id || user?._id === selectedPhone.seller?._id;
+
 
                 return (
                   <div key={idx} className={`review-card ${isHidden ? 'hidden-review' : ''}`}>
                     <p><strong>
-                      {review.user?.firstname} {review.user?.lastname || 'Unknown Reviewer'}
+                      {review.reviewer?.firstname} {review.reviewer?.lastname || 'Unknown Reviewer'}
                     </strong></p>
                     <p>Rating: {review.rating}</p>
-
                     {isLong ? (
                       <p>
                         {review.comment.slice(0, 200)}...
@@ -248,7 +253,7 @@ const MainPage = () => {
 
               <h3>Add to Wishlist</h3>
               <button onClick={() => {
-                addToWishlist(selectedPhone, isLoggedIn.id);
+                addToWishlist(selectedPhone, user._id);
                 alert("Item added to wishlist!");
               }}>
                 Add to Wishlist
@@ -276,7 +281,7 @@ const MainPage = () => {
               <button
                 onClick={async () => {
                   try {
-                    const response = await fetch(`${API_BASE}/phones/${selectedPhone._id}/reviews`, {
+                    const response = await fetch(`/api/phone/${selectedPhone._id}/reviews`, {
                       method: 'POST',
                       headers: {
                         'Content-Type': 'application/json'

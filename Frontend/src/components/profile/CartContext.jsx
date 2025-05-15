@@ -1,5 +1,5 @@
 import React, { createContext, useState } from 'react';
-const API_BASE = import.meta.env.VITE_API_BASE;
+
 // eslint-disable-next-line react-refresh/only-export-components
 export const CartContext = createContext();
 
@@ -8,7 +8,7 @@ export const CartProvider = ({ children }) => {
   const getPhoneKey = (phone) => `${phone.title}_${phone.brand}_${phone.price}`;
   const addToCart = async (phone, quantity, userId) => {
     try {
-      const res = await fetch(`${API_BASE}/cart`, {
+      const res = await fetch(`api/cart`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -31,7 +31,7 @@ export const CartProvider = ({ children }) => {
 
   const fetchCart = async (userId) => {
     try {
-      const res = await fetch(`${API_BASE}/cart/${userId}`);
+      const res = await fetch(`api/cart/${userId}`);
       const data = await res.json();
       if (res.ok) {
         setCartItems(data);
@@ -52,7 +52,7 @@ export const CartProvider = ({ children }) => {
     if (alreadyInWishlist) return;
 
     try {
-      const res = await fetch(`${API_BASE}/wishlist`, {
+      const res = await fetch(`api/wishlist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -75,7 +75,7 @@ export const CartProvider = ({ children }) => {
   const removeFromWishlist = async (phone, userId) => {
     
     try {
-      const res = await fetch(`${API_BASE}/wishlist`, {
+      const res = await fetch(`api/wishlist`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, phoneId: phone._id })
@@ -94,7 +94,7 @@ export const CartProvider = ({ children }) => {
 
   const updateQuantity = async (phone, quantity, userId) => {
     try {
-      const res = await fetch(`${API_BASE}/cart`, {
+      const res = await fetch(`api/cart`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, phoneId: phone._id, quantity })
@@ -113,7 +113,7 @@ export const CartProvider = ({ children }) => {
 
   const removeFromCart = async (phone, userId) => {
     try {
-      const res = await fetch(`${API_BASE}/cart`, {
+      const res = await fetch(`api/cart`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, phoneId: phone._id })

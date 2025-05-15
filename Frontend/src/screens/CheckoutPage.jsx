@@ -1,32 +1,47 @@
 import React, { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CartContext } from '../components/profile/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 const getPhoneKey = (phone) => `${phone.title}_${phone.brand}_${phone.price}`;
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
   const { cartItems, updateQuantity, removeFromCart, clearCart, fetchCart } = useContext(CartContext);
-  const isLoggedIn = { id: "5f5237a4c1beb1523fa3da02", name: "Test User" }; // temp
 
   useEffect(() => {
-    fetchCart(isLoggedIn.id);
-  }, [fetchCart, isLoggedIn.id]);
+    if (user) {
+      fetchCart(user._id);
+    }
+  }, [fetchCart, user]);
+
   const handleQuantityChange = (phone, value) => {
     const quantity = Math.max(0, parseInt(value) || 0);
-    updateQuantity(phone, quantity, isLoggedIn.id);
+    if (user) updateQuantity(phone, quantity, user._id);
   };
 
   const handleConfirm = async () => {
-    alert('Transaction confirmed!');
-    await clearCart(isLoggedIn.id);
-    navigate('/');
+    if (user) {
+      alert('Transaction confirmed!');
+      await clearCart(user._id);
+      navigate('/');
+    }
   };
 
   const totalPrice = cartItems.reduce(
     (sum, item) => sum + item.phone.price * item.quantity,
     0
   );
+
+  // Loading or unauthenticated guard
+  if (loading) {
+    return <div style={{ padding: '2rem' }}>Loading...</div>;
+  }
+
+  if (!user) {
+    return <div style={{ padding: '2rem' }}>You must be logged in to view this page.</div>;
+  }
 
   return (
     <div className="checkout-page">
@@ -52,7 +67,7 @@ const CheckoutPage = () => {
                     style={{ marginLeft: '10px', width: '60px' }}
                   />
                 </label>
-                <button onClick={() => removeFromCart(item.phone, isLoggedIn.id)}>Remove</button>
+                <button onClick={() => removeFromCart(item.phone, user._id)}>Remove</button>
               </li>
             ))}
           </ul>
