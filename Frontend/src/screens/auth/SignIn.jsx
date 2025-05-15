@@ -69,7 +69,7 @@ const SignIn = ({ onSwitchToSignUp }) => {
         </button>
 
         <div className="signin-links">
-          <Link to="/reset-password" className="reset-link">
+          <Link to="/forgot-password" className="reset-link">
             Forgot password?
           </Link>
           <span className="divider">|</span>

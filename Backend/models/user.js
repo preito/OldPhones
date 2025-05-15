@@ -17,13 +17,13 @@ const userSchema = new mongoose.Schema(
         phone: { type: mongoose.Schema.Types.ObjectId, ref: "Phone" },
         quantity: { type: Number, default: 1 },
       },
-      
     ],
-    verified: { type: Boolean, default: false }, 
+    verified: { type: Boolean, default: false },
     verificationToken: { type: String },
     verificationTokenExpires: { type: Date },
     sadmin: { type: Boolean, default: false },
-    // verified: { type: Boolean, required: true }, Will need something like this for email verification
+    resetPasswordToken: { type: String },
+    resetPasswordExpires: { type: Date },
   },
   { timestamps: true }
 ); // Use this if your collection name is explicitly `user`
