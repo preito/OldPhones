@@ -46,7 +46,7 @@ async function ensureSuperAdmin() {
   try {
     const existing = await User.findOne({ sadmin: true });
     if (!existing) {
-      const hashed = await bcrypt.hash("Admin@1234", 10); // Choose a secure password
+      const hashed = await bcrypt.hash("Admin@1234", 10); 
       const admin = new User({
         firstname: "Super",
         lastname: "Admin",
@@ -55,12 +55,12 @@ async function ensureSuperAdmin() {
         sadmin: true,
       });
       await admin.save();
-      console.log("✅ Super admin account created.");
+      console.log("Super admin account created.");
     } else {
-      console.log("🔒 Super admin already exists.");
+      console.log("Super admin already exists.");
     }
   } catch (err) {
-    console.error("❌ Failed to create super admin:", err);
+    console.error("Failed to create super admin:", err);
   }
 }
 
