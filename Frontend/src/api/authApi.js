@@ -6,3 +6,6 @@ export const me = () => axios.get( '/auth/me')
 
 export const register = (payload) =>
   axios.post('/auth/register', payload)
+
+export const verifyEmail = ({ token, email }) =>
+  axios.get('/auth/verify-email', { params: { token, email } })

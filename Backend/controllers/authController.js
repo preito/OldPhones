@@ -1,5 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
+const sendEmail = require("../utils/sendEmail");
 
 // POST /api/auth/login
 exports.login = async (req, res) => {
@@ -8,6 +10,12 @@ exports.login = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: "User not found" });
+    }
+
+    if (!user.verified) {
+      return res
+        .status(403)
+        .json({ message: "Please verify your email first." });
     }
 
     // Use bcrypt.compare to check hashed password
@@ -20,8 +28,8 @@ exports.login = async (req, res) => {
     req.session.user = { id: user._id, email: user.email };
     res.json({ message: "Logged in" });
   } catch (err) {
-    console.error('Login error:', err);
-    res.status(500).json({ message: 'Server error.' });
+    console.error("Login error:", err);
+    res.status(500).json({ message: "Server error." });
   }
 };
 
@@ -62,6 +70,10 @@ exports.register = async (req, res) => {
     // Hash the password
     const hashed = await bcrypt.hash(password, 10);
 
+    //Email Verification
+    const token = crypto.randomBytes(32).toString("hex");
+    const expires = new Date(Date.now() + 1000 * 60 * 60); // 1 hour from now
+
     // Create & save the user
     const user = new User({
       firstname: firstName,
@@ -69,16 +81,79 @@ exports.register = async (req, res) => {
       email,
       password: hashed,
       verified: false,
+      verificationToken: token,
+      verificationTokenExpires: expires,
     });
     await user.save();
 
+    const verifyURL = `${process.env.FRONTEND_URL}/verify-email?token=${token}&email=${user.email}`;
+
+    await sendEmail({
+      to: user.email,
+      subject: "Verify your email address",
+      html: `<p>Hi ${user.firstname},</p>
+            <p>Please click <a href="${verifyURL}">here</a> to verify your account.</p>`,
+    });
+
     // Respond with the newly created user’s basic info
     return res.status(201).json({
-      message: "Account created successfully.",
+      message: "Account created successfully. Awaiting email verification",
       user: { id: user._id, email: user.email },
     });
   } catch (err) {
     console.error("Register error:", err);
     return res.status(500).json({ message: "Server error." });
+  }
+};
+
+
+exports.verifyEmail = async (req, res) => {
+  try {
+    const { token, email } = req.query;
+    console.log('🔍 verifyEmail called with:', { token, email });
+
+    if (!token || !email) {
+      return res.status(400).send('Invalid verification link.');
+    }
+
+    // 1) lookup by email only
+    const user = await User.findOne({ email });
+    if (!user) {
+      console.log('❌ No such user for email:', email);
+      return res.status(400).send('Invalid verification link.');
+    }
+
+    // 2) if already verified, succeed
+    if (user.verified) {
+      console.log('ℹ️  User already verified:', email);
+      return res.send('Email already verified; you can sign in.');
+    }
+
+    // 3) now check token & expiry
+    const now = new Date();
+    if (
+      user.verificationToken !== token ||
+      !user.verificationTokenExpires ||
+      user.verificationTokenExpires < now
+    ) {
+      console.log('❌ Token mismatch or expired:', {
+        tokenStored: user.verificationToken,
+        expires:     user.verificationTokenExpires,
+        now,
+      });
+      return res.status(400).send('Invalid or expired link.');
+    }
+
+    // 4) mark verified
+    user.verified = true;
+    user.verificationToken = undefined;
+    user.verificationTokenExpires = undefined;
+    await user.save();
+    console.log('✅ Email verified for:', email);
+
+    return res.send('Email verified! You can now sign in.');
+  } catch (err) {
+    console.error('verifyEmail error:', err);
+    return res.status(500).send('Server error.');
   }
 };

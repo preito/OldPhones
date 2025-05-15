@@ -7,6 +7,9 @@ import CheckoutPage from "./screens/CheckoutPage";
 import { CartProvider } from "./components/profile/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import Wishlist from "./screens/Wishlist";
+import EmailSent from "./screens/auth/EmailSent";
+import VerifyEmail from "./screens/auth/VerifyEmail";
+
 
 function App() {
   return (
@@ -21,6 +24,8 @@ function App() {
               <Route path="/" element={<MainPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/wishlist" element={<Wishlist />} />
+              <Route path="/email-sent" element={<EmailSent />} />
+              <Route path="/verify-email" element={<VerifyEmail />} />
             </Routes>
           </div>
         </Router>

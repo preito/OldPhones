@@ -18,7 +18,9 @@ const userSchema = new mongoose.Schema(
         quantity: { type: Number, default: 1 },
       },
     ],
-    // verified: { type: Boolean, required: true }, Will need something like this for email verification
+    verified: { type: Boolean, default: false }, 
+    verificationToken: { type: String },
+    verificationTokenExpires: { type: Date },
   },
   { timestamps: true }
 ); // Use this if your collection name is explicitly `user`

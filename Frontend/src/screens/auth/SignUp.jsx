@@ -66,7 +66,7 @@ export default function SignUp() {
 
       
       alert(data.message); 
-      navigate("/signin"); // Send them to /signin but should send to /verify-email then to /signin.
+      navigate("/email-sent");
     } catch (err) {
       // Show the server‐side error if there is one.
       const msg =
