@@ -10,7 +10,9 @@ exports.login = async (req, res) => {
 
   // attach user to session
   req.session.user = { id: user._id, email: user.email }
-  res.json({ message: 'Logged in' })
+  res.json({ message: 'Logged in',
+    user: user
+   })
   
 }
 

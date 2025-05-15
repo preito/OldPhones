@@ -7,6 +7,7 @@ import CheckoutPage from "./screens/CheckoutPage";
 import { CartProvider } from "./components/profile/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import Wishlist from "./screens/Wishlist";
+import Admin from "./screens/Admin";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
               <Route path="/signin" element={<SignIn />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/" element={<MainPage />} />
+              <Route path="/admin" element={<Admin />} />
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/wishlist" element={<Wishlist />} />
             </Routes>

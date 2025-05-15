@@ -16,10 +16,14 @@ const SignIn = ({ onSwitchToSignUp }) => {
     e.preventDefault();
     setError("");
 
-    const { success, message } = await login(email, password);
+    const { success, message, user } = await login(email, password);
 
     if (success) {
-      navigate("/");
+      if (user?.sadmin==="") {
+        navigate("/admin")
+      } else {
+        navigate("/");
+      }
     } else {
       setError(message);
     }
