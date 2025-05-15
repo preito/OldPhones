@@ -17,8 +17,9 @@ const userSchema = new mongoose.Schema(
         phone: { type: mongoose.Schema.Types.ObjectId, ref: "Phone" },
         quantity: { type: Number, default: 1 },
       },
-      sadmin: { type: Boolean, default: false },
+      
     ],
+    sadmin: { type: Boolean, default: false },
     // verified: { type: Boolean, required: true }, Will need something like this for email verification
   },
   { timestamps: true }
