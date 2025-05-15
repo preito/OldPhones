@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import TopBar from '../components/profile/TopBar';
 import PhoneCard from '../components/profile/PhoneCard';
 import { useNavigate } from 'react-router-dom';
-import { CartContext } from '../components/profile/CartContext';
+import { CartContext } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext'; 
 
 const MainPage = () => {
