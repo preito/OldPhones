@@ -32,7 +32,6 @@ exports.login = async (req, res) => {
   }
 };
 
-
 exports.me = async (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ message: "Not authenticated" });
@@ -253,5 +252,48 @@ exports.updateProfile = async (req, res) => {
   } catch (err) {
     console.error("updateProfile error:", err);
     res.status(500).json({ message: "Server error." });
+  }
+};
+
+exports.changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+  
+    if (!req.session.user) {
+      return res.status(401).json({ message: "Not authenticated." });
+    }
+
+
+    const user = await User.findById(req.session.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    const match = await bcrypt.compare(currentPassword, user.password);
+    if (!match) {
+      return res
+        .status(401)
+        .json({ message: "Current password is incorrect." });
+    }
+
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+ 
+    await sendEmail({
+      to: user.email,
+      subject: "Your password has been changed",
+      html: `
+        <p>Hi ${user.firstname},</p>
+        <p>This is a notification that your account password was just changed.</p>
+      `,
+    });
+
+    return res.json({ message: "Password changed successfully." });
+  } catch (err) {
+    console.error("changePassword error:", err);
+    return res.status(500).json({ message: "Server error." });
   }
 };
