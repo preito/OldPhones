@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import * as adminApi from "../../api/adminApi";
 
 const mockUsers = Array.from({ length: 12 }, (_, i) => ({
   id: (i + 1).toString(),
@@ -22,16 +23,33 @@ const mockReviews = [
 
 export default function UserManagement() {
   const [users, setUsers] = useState([]);
+  const [meta, setMeta] = useState([]);
   const [editedUsers, setEditedUsers] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
   const [activeUserDetails, setActiveUserDetails] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const usersPerPage = 5;
+  const usersPerPage = 10;
 
-  useEffect(() => {
-    setUsers(mockUsers); // Simulated API fetch
-  }, []);
+  // useEffect(() => {
+  //   setUsers(mockUsers); // Simulated API fetch
+  // }, []);
 
+  useEffect(
+    () => {
+      const fetchUsers = async () => {
+        try {
+          const response = await adminApi.fetchUsers(currentPage, usersPerPage);
+          console.log("Fetched users:", response);
+          setUsers(response.data);
+          setMeta(response.meta);
+        } catch (error) {
+          console.error("Error fetching users:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchUsers();
+    }, []);
   const handleEditChange = (id, field, value) => {
     setEditedUsers((prev) => ({
       ...prev,
@@ -90,7 +108,7 @@ export default function UserManagement() {
       />
 
       <div className="overflow-x-auto">
-        <table className="min-w-full table-auto border border-gray-300">
+        <table className="max-w-screen-md table-auto border border-gray-300">
           <thead className="bg-gray-100">
             <tr>
               <th className="px-4 py-2 text-left">Full Name</th>
