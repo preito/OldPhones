@@ -40,7 +40,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/", authRoutes);
 app.use("/", routes);
-app.use("/admin", adminRoutes);  // separate admin route
+app.use("/api/admin", adminRoutes);  // separate admin route
 
 async function ensureSuperAdmin() {
   try {

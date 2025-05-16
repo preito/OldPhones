@@ -4,7 +4,7 @@ import SignIn from "./screens/auth/SignIn";
 import SignUp from "./screens/auth/SignUp";
 import MainPage from "./screens/MainPage";
 import CheckoutPage from "./screens/CheckoutPage";
-import { CartProvider } from "./components/profile/CartContext";
+import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import Wishlist from "./screens/Wishlist";
 import EmailSent from "./screens/auth/EmailSent";
