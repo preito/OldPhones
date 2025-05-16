@@ -3,7 +3,6 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
 
-// POST /api/auth/login
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -33,17 +32,16 @@ exports.login = async (req, res) => {
   }
 };
 
-// GET /api/auth/me
+
 exports.me = async (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ message: "Not authenticated" });
   }
-  // optional: re-fetch full user from DB incase details have changed since
+  // re-fetch full user from DB incase details have changed since
   const user = await User.findById(req.session.user.id).select("-password");
   res.json(user);
 };
 
-// POST /api/auth/logout
 exports.logout = (req, res) => {
   req.session.destroy((err) => {
     if (err) return res.status(500).json({ message: "Logout failed" });
@@ -72,8 +70,7 @@ exports.register = async (req, res) => {
 
     //Email Verification
     const token = crypto.randomBytes(32).toString("hex");
-    const expires = new Date(Date.now() + 1000 * 60 * 60); // 1 hour from now
-
+    const expires = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
     // Create & save the user
     const user = new User({
       firstname: firstName,
@@ -201,7 +198,6 @@ exports.resetPassword = async (req, res) => {
     }
     const now = new Date();
     if (!user.resetPasswordExpires || user.resetPasswordExpires < now) {
-  
       return res.status(400).json({ message: "Reset link has expired." });
     }
 
@@ -215,5 +211,47 @@ exports.resetPassword = async (req, res) => {
   } catch (err) {
     console.error("resetPassword error:", err);
     return res.status(500).json({ message: "Server error." });
+  }
+};
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const { firstName, lastName, email, password } = req.body;
+    // Auth check
+    if (!req.session.user) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    // Fetch user
+    const user = await User.findById(req.session.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    //Verify current password
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      return res.status(401).json({ message: "Incorrect password" });
+    }
+    // Update fields
+    user.firstname = firstName;
+    user.lastname = lastName;
+    user.email = email;
+    await user.save();
+
+    // update session email
+    req.session.user.email = email;
+
+    // Return success + updated user
+    res.json({
+      message: "Profile updated successfully",
+      user: {
+        id: user._id,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        email: user.email,
+      },
+    });
+  } catch (err) {
+    console.error("updateProfile error:", err);
+    res.status(500).json({ message: "Server error." });
   }
 };
