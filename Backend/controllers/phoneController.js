@@ -163,12 +163,12 @@ exports.phoneEnableDisable = async (req, res) => {
 
 module.exports.addReview = async (req, res) => {
   const { rating, comment } = req.body;
-  const userId = req.user?._id;
+  const userId = req.session.user?.id;
 
   if (!userId) {
     return res
       .status(401)
-      .json({ message: "Unauthorized. User not logged in." });
+      .json({ message: "Unauthorized User." });
   }
 
   try {
@@ -236,3 +236,30 @@ module.exports.reviewerInfo = async (req, res) => {
       .json({ message: "Error fetching reviews", error: error.message });
   }
 };
+
+module.exports.reduceStock = async (req, res) => {
+  const phoneId = req.params.id;
+  const { quantity } = req.body;
+  console.log('Body:', req.body)
+  if (typeof quantity !== 'number' || quantity <= 0) {
+    return res.status(400).json({ message: 'Invalid quantity' });
+  }
+
+  try {
+    const phone = await Phone.findById(phoneId);
+    if (!phone) return res.status(404).send('Phone not found');
+
+    if (phone.stock < quantity) {
+      return res.status(400).json({ message: 'Not enough stock' });
+    }
+
+    phone.stock -= quantity;
+    await phone.save();
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error reducing stock' });
+  }
+};
+

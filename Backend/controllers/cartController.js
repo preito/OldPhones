@@ -39,7 +39,7 @@ module.exports.getCart = async (req, res) => {
 
 // Remove item from cart
 exports.removeFromCart = async (req, res) => {
-  const { userId, phoneId } = req.body;
+  const { userId, phoneId } = req.params;
 
   try {
     const user = await User.findById(userId);

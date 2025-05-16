@@ -1,4 +1,5 @@
 import React, { createContext, useState } from 'react';
+// import User from '../../../Backend/models/User';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const CartContext = createContext();
@@ -113,10 +114,8 @@ export const CartProvider = ({ children }) => {
 
   const removeFromCart = async (phone, userId) => {
     try {
-      const res = await fetch(`api/cart`, {
+      const res = await fetch(`api/cart/${userId}/${phone._id}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, phoneId: phone._id })
       });
 
       const data = await res.json();
