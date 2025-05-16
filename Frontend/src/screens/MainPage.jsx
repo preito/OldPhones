@@ -260,7 +260,6 @@ const MainPage = () => {
               <button onClick={() => {
                 if (!user) {
                   alert("Please sign in to add items to your wishlist.");
-                  navigate("/signin");
                   return;
                 }
 
