@@ -21,9 +21,10 @@ const userSchema = new mongoose.Schema(
     verified: { type: Boolean, default: false },
     verificationToken: { type: String },
     verificationTokenExpires: { type: Date },
-    sadmin: { type: Boolean, default: false },
+    sadmin: { type: Boolean },
     resetPasswordToken: { type: String },
     resetPasswordExpires: { type: Date },
+    disabled: { type: Boolean, default: false },
   },
   { timestamps: true }
 ); // Use this if your collection name is explicitly `user`

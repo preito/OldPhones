@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await authApi.login(email, password)
       await refreshUser()
-      return { success: true }
+      return { success: true, user:user }
     } catch (err) {
       const message =
         err.response?.data?.message ||

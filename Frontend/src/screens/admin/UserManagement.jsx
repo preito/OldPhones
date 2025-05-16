@@ -3,53 +3,33 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import * as adminApi from "../../api/adminApi";
 
-const mockUsers = Array.from({ length: 12 }, (_, i) => ({
-  id: (i + 1).toString(),
-  firstname: `User${i + 1}`,
-  lastname: `Last${i + 1}`,
-  email: `user${i + 1}@example.com`,
-  lastLogin: new Date(),
-}));
-
-const mockListings = [
-  { id: "l1", title: "iPhone 11", date: "2023-08-01" },
-  { id: "l2", title: "Samsung S20", date: "2023-09-15" },
-];
-
-const mockReviews = [
-  { id: "r1", text: "Great seller!", rating: 5 },
-  { id: "r2", text: "Fast delivery", rating: 4 },
-];
-
 export default function UserManagement() {
   const [users, setUsers] = useState([]);
-  const [meta, setMeta] = useState([]);
+  const [meta, setMeta] = useState({ total: 0, pages: 1 });
   const [editedUsers, setEditedUsers] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
   const [activeUserDetails, setActiveUserDetails] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const usersPerPage = 10;
 
-  // useEffect(() => {
-  //   setUsers(mockUsers); // Simulated API fetch
-  // }, []);
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setLoading(true);
+      try {
+        const { data, meta } = await adminApi.fetchUsers(currentPage, usersPerPage, searchTerm);
+        setUsers(data);
+        setMeta(meta);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  useEffect(
-    () => {
-      const fetchUsers = async () => {
-        try {
-          const response = await adminApi.fetchUsers(currentPage, usersPerPage);
-          console.log("Fetched users:", response);
-          setUsers(response.data);
-          setMeta(response.meta);
-        } catch (error) {
-          console.error("Error fetching users:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchUsers();
-    }, []);
+    fetchUsers();
+  }, [currentPage, searchTerm]);
+
   const handleEditChange = (id, field, value) => {
     setEditedUsers((prev) => ({
       ...prev,
@@ -61,12 +41,21 @@ export default function UserManagement() {
     const confirm = window.confirm("Are you sure you want to save changes?");
     if (!confirm) return;
 
+    const edited = editedUsers[id];
+    if (!edited) return;
+
     try {
-      const edited = editedUsers[id];
+      const response = await adminApi.updateUser(id, {
+        firstname: edited.firstname,
+        lastname: edited.lastname,
+        email: edited.email,
+      });
+
       toast.success("User updated successfully");
 
+      // Update UI state
       setUsers((prev) =>
-        prev.map((user) => (user.id === id ? { ...user, ...edited } : user))
+        prev.map((user) => (user._id === id ? { ...user, ...edited } : user))
       );
       setEditedUsers((prev) => {
         const updated = { ...prev };
@@ -74,7 +63,24 @@ export default function UserManagement() {
         return updated;
       });
     } catch (error) {
+      console.error("Update error:", error);
       toast.error("Failed to update user");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    const confirm = window.confirm("Are you sure you want to delete this user?");
+    if (!confirm) return;
+
+    try {
+      await adminApi.deleteUser(id);
+      toast.success("User deleted successfully");
+
+      // Remove the user from state
+      setUsers((prev) => prev.filter((user) => user._id !== id));
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast.error("Failed to delete user");
     }
   };
 
@@ -87,10 +93,23 @@ export default function UserManagement() {
     );
   });
 
-  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-  const indexOfLastUser = currentPage * usersPerPage;
-  const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  const handleToggleDisable = async (userId) => {
+    const confirm = window.confirm("Are you sure you want to toggle the user's active status?");
+    if (!confirm) return;
+
+    try {
+      const result = await adminApi.toggleUserDisable(userId);
+      toast.success(result.message);
+
+      // Refresh users after toggling
+      const updated = await adminApi.fetchUsers(currentPage, usersPerPage);
+      setUsers(updated.data);
+      setMeta(updated.meta);
+    } catch (error) {
+      console.error("Error toggling user status:", error);
+      toast.error("Failed to change user status");
+    }
+  };
 
   return (
     <div className="p-6">
@@ -103,90 +122,97 @@ export default function UserManagement() {
         value={searchTerm}
         onChange={(e) => {
           setSearchTerm(e.target.value);
-          setCurrentPage(1); // reset to first page on new search
+          setCurrentPage(1);
         }}
       />
 
-      <div className="overflow-x-auto">
-        <table className="max-w-screen-md table-auto border border-gray-300">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-4 py-2 text-left">Full Name</th>
-              <th className="px-4 py-2 text-left">Email</th>
-              <th className="px-4 py-2 text-left">Last Login Date</th>
-              <th className="px-4 py-2 text-left">Last Login Time</th>
-              <th className="px-4 py-2 text-left">Actions</th>
-              <th className="px-4 py-2 text-left">Details</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentUsers.map((user) => {
-              const edited = editedUsers[user.id] || {};
-              const loginDate = new Date(user.lastLogin).toLocaleDateString();
-              const loginTime = new Date(user.lastLogin).toLocaleTimeString();
+      {loading ? (
+        <p>Loading users...</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="max-w-screen-md table-auto border border-gray-300">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-4 py-2 text-left">Full Name</th>
+                <th className="px-4 py-2 text-left">Email</th>
+                <th className="px-4 py-2 text-left">Created At</th>
+                <th className="px-4 py-2 text-left">Actions</th>
+                <th className="px-4 py-2 text-left">Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredUsers.map((user) => {
+                const edited = editedUsers[user._id] || {};
+                const createdDate = new Date(user.createdAt).toLocaleDateString();
+                return (
+                  <tr key={user._id} className="border-t">
+                    <td className="px-4 py-2">
+                      <input
+                        type="text"
+                        className="w-full border rounded px-2 py-1"
+                        value={edited.firstname ?? user.firstname}
+                        onChange={(e) =>
+                          handleEditChange(user._id, "firstname", e.target.value)
+                        }
+                      />
+                      <input
+                        type="text"
+                        className="w-full border rounded px-2 py-1 mt-1"
+                        value={edited.lastname ?? user.lastname}
+                        onChange={(e) =>
+                          handleEditChange(user._id, "lastname", e.target.value)
+                        }
+                      />
+                    </td>
+                    <td className="px-4 py-2">
+                      <input
+                        type="email"
+                        className="w-full border rounded px-2 py-1"
+                        value={edited.email ?? user.email}
+                        onChange={(e) =>
+                          handleEditChange(user._id, "email", e.target.value)
+                        }
+                      />
+                    </td>
+                    <td className="px-4 py-2">{createdDate}</td>
+                    <td className="px-4 py-2 flex gap-2">
+                      <button
+                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                        onClick={() => handleSave(user._id)}
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => handleToggleDisable(user._id)}
+                        className={`px-3 py-1 rounded font-medium transition ${user.disabled
+                          ? "bg-green-500 text-white hover:bg-green-600"  // For "Enable"
+                          : "bg-yellow-500 text-white hover:bg-yellow-600" // For "Disable"
+                          }`}
+                      >
+                        {user.disabled ? "Enable" : "Disable"}
+                      </button>
+                      <button className="text-red-600 hover:underline"
+                        onClick={() => handleDelete(user._id)}>
+                        Delete
+                      </button>
+                    </td>
+                    <td className="px-4 py-2">
+                      <button
+                        onClick={() => setActiveUserDetails(user)}
+                        className="text-indigo-600 hover:underline"
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-              return (
-                <tr key={user.id} className="border-t">
-                  <td className="px-4 py-2">
-                    <input
-                      type="text"
-                      className="w-full border rounded px-2 py-1"
-                      value={edited.firstname ?? user.firstname}
-                      onChange={(e) =>
-                        handleEditChange(user.id, "firstname", e.target.value)
-                      }
-                    />
-                    <input
-                      type="text"
-                      className="w-full border rounded px-2 py-1 mt-1"
-                      value={edited.lastname ?? user.lastname}
-                      onChange={(e) =>
-                        handleEditChange(user.id, "lastname", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td className="px-4 py-2">
-                    <input
-                      type="email"
-                      className="w-full border rounded px-2 py-1"
-                      value={edited.email ?? user.email}
-                      onChange={(e) =>
-                        handleEditChange(user.id, "email", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td className="px-4 py-2">{loginDate}</td>
-                  <td className="px-4 py-2">{loginTime}</td>
-                  <td className="px-4 py-2 flex gap-2">
-                    <button
-                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-                      onClick={() => handleSave(user.id)}
-                    >
-                      Save
-                    </button>
-                    <button className="text-yellow-600 hover:underline">
-                      Disable
-                    </button>
-                    <button className="text-red-600 hover:underline">
-                      Delete
-                    </button>
-                  </td>
-                  <td className="px-4 py-2">
-                    <button
-                      onClick={() => setActiveUserDetails(user)}
-                      className="text-indigo-600 hover:underline"
-                    >
-                      View
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination controls */}
+      {/* Pagination */}
       <div className="mt-4 flex justify-between max-w-md mx-auto">
         <button
           className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
@@ -196,18 +222,18 @@ export default function UserManagement() {
           Previous
         </button>
         <span className="self-center font-medium">
-          Page {currentPage} of {totalPages}
+          Page {currentPage} of {meta.pages}
         </span>
         <button
           className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
           onClick={() => setCurrentPage((p) => p + 1)}
-          disabled={currentPage === totalPages}
+          disabled={currentPage === meta.pages}
         >
           Next
         </button>
       </div>
 
-      {/* Modal for listings & reviews */}
+      {/* Modal remains unchanged */}
       {activeUserDetails && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[90%] max-w-2xl relative">
@@ -216,27 +242,8 @@ export default function UserManagement() {
               {activeUserDetails.lastname}
             </h2>
 
-            <div className="mb-4">
-              <h3 className="font-semibold mb-2">Listings:</h3>
-              <ul className="list-disc list-inside space-y-1">
-                {mockListings.map((listing) => (
-                  <li key={listing.id}>
-                    {listing.title} — {listing.date}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-2">Reviews:</h3>
-              <ul className="list-disc list-inside space-y-1">
-                {mockReviews.map((review) => (
-                  <li key={review.id}>
-                    "{review.text}" — {review.rating}⭐
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {/* You should ideally fetch listings & reviews for the user from API */}
+            <p>Listings and Reviews placeholder here.</p>
 
             <button
               className="absolute top-2 right-2 text-gray-600 hover:text-black"

@@ -19,7 +19,7 @@ const SignIn = ({ onSwitchToSignUp }) => {
     const { success, message, user } = await login(email, password);
 
     if (success) {
-      if (user?.sadmin=== true) {
+      if (user?.sadmin === true) {
         navigate("/admin")
       } else {
         navigate("/");
