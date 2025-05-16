@@ -8,14 +8,14 @@ import React, {
 import * as authApi from '../api/authApi'
 import axios from 'axios'
 
-
 axios.defaults.withCredentials = true
 
 const AuthContext = createContext({
-  user: null,           
-  loading: true,       
+  user: null,
+  loading: true,
   login: async () => {},
   logout: async () => {},
+  refreshUser: async () => {},
 })
 
 export const useAuth = () => useContext(AuthContext)
@@ -24,26 +24,29 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser]       = useState(null)
   const [loading, setLoading] = useState(true)
 
-
-  useEffect(() => {
-    ;(async () => {
-      try {
-        const { data } = await authApi.me()
-        setUser(data)
-      } catch {
-        setUser(null)
-      } finally {
-        setLoading(false)
-      }
-    })()
+  // refresh the current user
+  const refreshUser = useCallback(async () => {
+    setLoading(true)
+    try {
+      const { data } = await authApi.me()
+      setUser(data)
+    } catch {
+      setUser(null)
+    } finally {
+      setLoading(false)
+    }
   }, [])
+
+  // on mount, fetch the user
+  useEffect(() => {
+    refreshUser()
+  }, [refreshUser])
 
   const login = useCallback(async (email, password) => {
     setLoading(true)
     try {
       await authApi.login(email, password)
-      const { data } = await authApi.me()
-      setUser(data)
+      await refreshUser()
       return { success: true }
     } catch (err) {
       const message =
@@ -55,9 +58,8 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [refreshUser])
 
- 
   const logout = useCallback(async () => {
     try {
       await authApi.logout()
@@ -69,7 +71,9 @@ export const AuthProvider = ({ children }) => {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, logout, refreshUser }}
+    >
       {children}
     </AuthContext.Provider>
   )

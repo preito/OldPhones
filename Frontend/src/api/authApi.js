@@ -15,3 +15,9 @@ export const forgotPassword = ({ email }) =>
 
 export const resetPassword = ({ token, email, newPassword }) =>
   axios.post("/auth/reset-password", { token, email, newPassword });
+
+export const updateProfile = (payload) =>
+  axios.put("/auth/update-profile", payload);
+
+export const changePassword = ({ currentPassword, newPassword }) =>
+  axios.post("/auth/change-password", { currentPassword, newPassword });
