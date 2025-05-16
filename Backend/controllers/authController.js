@@ -26,9 +26,7 @@ exports.login = async (req, res) => {
 
     // attach user to session
     req.session.user = { id: user._id, email: user.email };
-    res.json({ message: 'Logged in',
-    user: user
-   })
+    res.json({ message: "Logged in", user: user });
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ message: "Server error." });
@@ -108,27 +106,26 @@ exports.register = async (req, res) => {
   }
 };
 
-
 exports.verifyEmail = async (req, res) => {
   try {
     const { token, email } = req.query;
-    console.log('verifyEmail called with:', { token, email });
+    console.log("verifyEmail called with:", { token, email });
 
     if (!token || !email) {
-      return res.status(400).send('Invalid verification link.');
+      return res.status(400).send("Invalid verification link.");
     }
 
     // 1) lookup by email only
     const user = await User.findOne({ email });
     if (!user) {
-      console.log('No such user for email:', email);
-      return res.status(400).send('Invalid verification link.');
+      console.log("No such user for email:", email);
+      return res.status(400).send("Invalid verification link.");
     }
 
     // 2) if already verified, succeed
     if (user.verified) {
-      console.log('User already verified:', email);
-      return res.send('Email already verified; you can sign in.');
+      console.log("User already verified:", email);
+      return res.send("Email already verified; you can sign in.");
     }
 
     // 3) now check token & expiry
@@ -138,12 +135,12 @@ exports.verifyEmail = async (req, res) => {
       !user.verificationTokenExpires ||
       user.verificationTokenExpires < now
     ) {
-      console.log('Token mismatch or expired:', {
+      console.log("Token mismatch or expired:", {
         tokenStored: user.verificationToken,
-        expires:     user.verificationTokenExpires,
+        expires: user.verificationTokenExpires,
         now,
       });
-      return res.status(400).send('Invalid or expired link.');
+      return res.status(400).send("Invalid or expired link.");
     }
 
     // 4) mark verified
@@ -151,11 +148,72 @@ exports.verifyEmail = async (req, res) => {
     user.verificationToken = undefined;
     user.verificationTokenExpires = undefined;
     await user.save();
-    console.log('Email verified for:', email);
+    console.log("Email verified for:", email);
 
-    return res.send('Email verified! You can now sign in.');
+    return res.send("Email verified! You can now sign in.");
   } catch (err) {
-    console.error('verifyEmail error:', err);
-    return res.status(500).send('Server error.');
+    console.error("verifyEmail error:", err);
+    return res.status(500).send("Server error.");
+  }
+};
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: "Email is required." });
+
+    const user = await User.findOne({ email });
+    if (!user)
+      return res.status(404).json({ message: "No account with that email." });
+
+    const token = crypto.randomBytes(32).toString("hex");
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = new Date(Date.now() + 1000 * 60 * 60);
+    await user.save();
+
+    const resetURL = `${
+      process.env.FRONTEND_URL
+    }/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
+    await sendEmail({
+      to: email,
+      subject: "Reset your password",
+      html: `<p>Click <a href="${resetURL}">here</a> to set a new password. This link expires in 1 hour.</p>`,
+    });
+
+    res.json({ message: "Reset link sent to your email." });
+  } catch (err) {
+    console.error("forgotPassword error:", err);
+    res.status(500).json({ message: "Server error." });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token, email, newPassword } = req.body;
+
+    if (!token || !email || !newPassword) {
+      return res.status(400).json({ message: "All fields are required." });
+    }
+
+    const user = await User.findOne({ email, resetPasswordToken: token });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired link." });
+    }
+    const now = new Date();
+    if (!user.resetPasswordExpires || user.resetPasswordExpires < now) {
+  
+      return res.status(400).json({ message: "Reset link has expired." });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+    return res.json({
+      message: "Password has been reset. You can now sign in.",
+    });
+  } catch (err) {
+    console.error("resetPassword error:", err);
+    return res.status(500).json({ message: "Server error." });
   }
 };

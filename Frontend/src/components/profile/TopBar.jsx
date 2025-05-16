@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext'; 
+import { useNavigate } from 'react-router-dom';
 
-const TopBar = ({ onSearch, onLogout, onCheckout, cartCount, wishlistCount, onWishlist }) => {
+const TopBar = ({ onSearch, onLogout, onCheckout, cartCount, wishlistCount, onWishlist}) => {
   const [searchText, setSearchText] = useState('');
   const { user} = useAuth(); // access user from AuthContext
-
+  const navigate = useNavigate();
   const handleSearch = () => {
     if (searchText.trim()) {
       onSearch(searchText);
@@ -45,10 +46,13 @@ const TopBar = ({ onSearch, onLogout, onCheckout, cartCount, wishlistCount, onWi
         )}
 
         {!user ? (
-          <button onClick={() => window.location.href = '/signin'}>Sign In</button>
+          <>
+          <button onClick={() => navigate('/')}>Home</button>
+          <button onClick={() => navigate('/signin')}>Sign In</button>
+          </>
         ) : (
           <>
-            <button onClick={() => window.location.href = '/profile'}>Profile</button>
+            <button onClick={() => navigate('/profile')}>Profile</button>
             <button onClick={onLogout}>Sign Out</button>
           </>
         )}

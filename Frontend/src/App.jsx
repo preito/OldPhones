@@ -9,7 +9,9 @@ import { AuthProvider } from "./context/AuthContext";
 import Wishlist from "./screens/Wishlist";
 import EmailSent from "./screens/auth/EmailSent";
 import VerifyEmail from "./screens/auth/VerifyEmail";
-import AdminLayout from "./components/admin/AdminLayout";
+import ForgotPassword from "./screens/auth/ForgotPassword";
+import ResetPassword from "./screens/auth/ResetPassword";
+import ProtectedRoute from './components/protectedRoutes/ProtectedProfileRoute';import AdminLayout from "./components/admin/AdminLayout";
 import UserManagement from './screens/admin/UserManagement';
 import ListingManagement from './screens/admin/ListingManagement';
 import AdminHome from './screens/admin/AdminHome';
@@ -21,10 +23,17 @@ function App() {
         <Router>
           <div className="h-full w-full">
             <Routes>
-              <Route path="/profile" element={<Profile />} />
+              <Route path="/" element={<MainPage />} />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/signin" element={<SignIn />} />
               <Route path="/signup" element={<SignUp />} />
-              <Route path="/" element={<MainPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/email-sent" element={<EmailSent />} />
@@ -35,6 +44,8 @@ function App() {
                 <Route path="home" element={<AdminHome />} />
                 <Route index element={<AdminHome />} />
               </Route>
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
             </Routes>
           </div>
         </Router>
