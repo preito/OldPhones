@@ -11,15 +11,17 @@ import EmailSent from "./screens/auth/EmailSent";
 import VerifyEmail from "./screens/auth/VerifyEmail";
 import ForgotPassword from "./screens/auth/ForgotPassword";
 import ResetPassword from "./screens/auth/ResetPassword";
-import ProtectedRoute from './components/protectedRoutes/ProtectedProfileRoute';
-import Admin from "./screens/Admin";
+import ProtectedRoute from './components/protectedRoutes/ProtectedProfileRoute';import AdminLayout from "./components/admin/AdminLayout";
+import UserManagement from './screens/admin/UserManagement';
+import ListingManagement from './screens/admin/ListingManagement';
+import AdminHome from './screens/admin/AdminHome';
 
 function App() {
   return (
     <AuthProvider>
       <CartProvider>
         <Router>
-          <div className="app">
+          <div className="h-full w-full">
             <Routes>
               <Route path="/" element={<MainPage />} />
               <Route
@@ -32,11 +34,16 @@ function App() {
               />
               <Route path="/signin" element={<SignIn />} />
               <Route path="/signup" element={<SignUp />} />
-              <Route path="/admin" element={<Admin />} />
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/email-sent" element={<EmailSent />} />
               <Route path="/verify-email" element={<VerifyEmail />} />
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route path="users" element={<UserManagement />} />
+                <Route path="listings" element={<ListingManagement />} />
+                <Route path="home" element={<AdminHome />} />
+                <Route index element={<AdminHome />} />
+              </Route>
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
             </Routes>
