@@ -102,7 +102,7 @@ export default function UserManagement() {
       toast.success(result.message);
 
       // Refresh users after toggling
-      const updated = await adminApi.fetchUsers(currentPage, usersPerPage);
+      const updated = await adminApi.fetchUsers(currentPage, usersPerPage, searchTerm);
       setUsers(updated.data);
       setMeta(updated.meta);
     } catch (error) {
@@ -112,13 +112,13 @@ export default function UserManagement() {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">User Management</h1>
+    <div className="p-3">
+      <h1 className="text-2xl font-bold mb-6 text-center">User Management</h1>
 
       <input
         type="text"
         placeholder="Search by name or email"
-        className="w-full max-w-md px-4 py-2 border rounded mb-4"
+        className="w-full max-w-md px-4 py-2 border rounded mb-4 mx-auto block"
         value={searchTerm}
         onChange={(e) => {
           setSearchTerm(e.target.value);
@@ -129,8 +129,8 @@ export default function UserManagement() {
       {loading ? (
         <p>Loading users...</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="max-w-screen-md table-auto border border-gray-300">
+        <div className="overflow-x-auto w-full">
+          <table className="w-full min-w-[700px] table-auto border border-gray-300">
             <thead className="bg-gray-100">
               <tr>
                 <th className="px-4 py-2 text-left">Full Name</th>
@@ -176,25 +176,27 @@ export default function UserManagement() {
                     </td>
                     <td className="px-4 py-2">{createdDate}</td>
                     <td className="px-4 py-2 flex gap-2">
-                      <button
-                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-                        onClick={() => handleSave(user._id)}
-                      >
-                        Save
-                      </button>
-                      <button
-                        onClick={() => handleToggleDisable(user._id)}
-                        className={`px-3 py-1 rounded font-medium transition ${user.disabled
-                          ? "bg-green-500 text-white hover:bg-green-600"  // For "Enable"
-                          : "bg-yellow-500 text-white hover:bg-yellow-600" // For "Disable"
-                          }`}
-                      >
-                        {user.disabled ? "Enable" : "Disable"}
-                      </button>
-                      <button className="text-red-600 hover:underline"
-                        onClick={() => handleDelete(user._id)}>
-                        Delete
-                      </button>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <button
+                          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                          onClick={() => handleSave(user._id)}
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => handleToggleDisable(user._id)}
+                          className={`px-3 py-1 rounded font-medium transition ${user.disabled
+                            ? "bg-green-500 text-white hover:bg-green-600"  // For "Enable"
+                            : "bg-yellow-500 text-white hover:bg-yellow-600" // For "Disable"
+                            }`}
+                        >
+                          {user.disabled ? "Enable" : "Disable"}
+                        </button>
+                        <button className="text-red-600 hover:underline"
+                          onClick={() => handleDelete(user._id)}>
+                          Delete
+                        </button>
+                      </div>
                     </td>
                     <td className="px-4 py-2">
                       <button
