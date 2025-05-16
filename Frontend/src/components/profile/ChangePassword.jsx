@@ -1,13 +1,15 @@
 import React, { useState } from "react";
+import * as authApi from "../../api/authApi";
 import "./ChangePassword.css";
 
 const ChangePassword = () => {
   const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [newPassword, setNewPassword]         = useState("");
+  const [error, setError]                     = useState("");
+  const [successMessage, setSuccessMessage]   = useState("");
+  const [submitting, setSubmitting]           = useState(false);
 
-  const validateAndSubmit = () => {
+  const validateAndSubmit = async () => {
     setError("");
     setSuccessMessage("");
 
@@ -15,15 +17,23 @@ const ChangePassword = () => {
       setError("Please fill in both fields.");
       return;
     }
-
     if (newPassword.length < 6) {
       setError("New password must be at least 6 characters.");
       return;
     }
 
-    // Placeholder for actual submission logic
-    console.log("Submitting:", { currentPassword, newPassword });
-    setSuccessMessage("Password changed successfully (mock)");
+    setSubmitting(true);
+    try {
+
+      const { data } = await authApi.changePassword({ currentPassword, newPassword });
+      setSuccessMessage(data.message); 
+      setCurrentPassword("");
+      setNewPassword("");
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to change password.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -38,6 +48,7 @@ const ChangePassword = () => {
             name="currentPassword"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
+            disabled={submitting}
           />
         </div>
         <div className="change-password-input-item">
@@ -48,12 +59,19 @@ const ChangePassword = () => {
             name="newPassword"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
+            disabled={submitting}
           />
         </div>
+
         {error && <p className="error-message">{error}</p>}
         {successMessage && <p className="success-message">{successMessage}</p>}
-        <button className="change-password-button" onClick={validateAndSubmit}>
-          Confirm
+
+        <button
+          className="change-password-button"
+          onClick={validateAndSubmit}
+          disabled={submitting}
+        >
+          {submitting ? "Saving…" : "Confirm"}
         </button>
       </div>
     </div>

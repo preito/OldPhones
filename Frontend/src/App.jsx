@@ -15,12 +15,15 @@ import ProtectedRoute from './components/protectedRoutes/ProtectedProfileRoute';
 import UserManagement from './screens/admin/UserManagement';
 import ListingManagement from './screens/admin/ListingManagement';
 import AdminHome from './screens/admin/AdminHome';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   return (
     <AuthProvider>
       <CartProvider>
         <Router>
+          <ToastContainer position="top-right" autoClose={3000} />
           <div className="h-full w-full">
             <Routes>
               <Route path="/" element={<MainPage />} />
