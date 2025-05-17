@@ -58,12 +58,28 @@ const MainPage = () => {
     }
 
     const quantity = Number(quantityInput);
-    if (quantity > 0) {
-      await addToCart(selectedPhone, quantity, user._id);
-      await fetchCart(user._id);
-      toast.success("Item added to cart!");
-      setQuantityInput('');
+    if (quantity <= 0) {
+      toast.info("Please enter a valid quantity.");
+      return;
     }
+
+    const existingCartItem = cartItems.find(item =>
+      `${item.phone.title}_${item.phone.brand}_${item.phone.price}` ===
+      `${selectedPhone.title}_${selectedPhone.brand}_${selectedPhone.price}`
+    );
+
+    const existingQuantity = existingCartItem ? existingCartItem.quantity : 0;
+    const totalDesired = existingQuantity + quantity;
+
+    if (totalDesired > selectedPhone.stock) {
+      toast.error("Not enough stock.");
+      return;
+    }
+
+    await addToCart(selectedPhone, quantity, user._id);
+    await fetchCart(user._id);
+    toast.success("Item added to cart!");
+    setQuantityInput('');
   };
 
   useEffect(() => {
@@ -188,10 +204,15 @@ const MainPage = () => {
 
             <h2 className="text-2xl font-bold mb-2">{selectedPhone.title}</h2>
             <img
-              src={`/images/${selectedPhone.brand}.jpeg`}
+              src={`/api/phone/image/name/${encodeURIComponent(selectedPhone.brand)}.jpeg`}
               alt={selectedPhone.title}
-              className="w-full max-w-xs mb-4"
+              className="w-full max-w-xs mb-4 rounded-xl transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = '/images/default-phone.jpeg'; // Use your default fallback image path
+              }}
             />
+
             <p><strong>Brand:</strong> {selectedPhone.brand}</p>
             <p><strong>Stock:</strong> {selectedPhone.stock}</p>
             <p><strong>Price:</strong> ${selectedPhone.price}</p>
@@ -292,7 +313,7 @@ const MainPage = () => {
                   <select
                     value={newRating}
                     onChange={(e) => setNewRating(Number(e.target.value))}
-                    className="ml-2 px-2 py-1 bg-zinc-600 border border-zinc-900 text-white rounded"
+                    className="ml-2 px-2 py-1 bg-zinc-300 border border-zinc-900 text-black rounded"
                   >
                     {[5, 4, 3, 2, 1].map(r => (
                       <option key={r} value={r}>{r}</option>
@@ -338,7 +359,7 @@ const MainPage = () => {
                       toast.error('Error submitting review.');
                     }
                   }}
-                  className="mt-3 bg-blue-500 px-4 py-2 rounded hover:bg-blue-700"
+                  className="mt-3 bg-blue-400 px-4 py-2 rounded hover:bg-blue-700"
                 >
                   Submit Review
                 </button>
