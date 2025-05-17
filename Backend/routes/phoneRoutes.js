@@ -7,6 +7,8 @@ const {
   createPhone,
   deletePhone,
   phoneEnableDisable,
+  getImageByName,
+  getImageById
 } = require("../controllers/phoneController.js");
 
 // GET /api/phones → Get all phones
@@ -19,5 +21,7 @@ router.get("/api/phones/my-listings", getMyPhones);
 router.post("/api/phones/create-phone", createPhone);
 router.delete("/api/phones/:id", deletePhone);
 router.put("/api/phones/:id", phoneEnableDisable);
+router.get("/api/phone/image/name/:name", getImageByName);
+router.put("/api/phone/image/id/:id", getImageById);
 
 module.exports = router;

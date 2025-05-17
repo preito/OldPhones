@@ -7,7 +7,6 @@ const bcrypt = require("bcrypt");
 const express = require("express");
 const session = require("express-session");
 const path = require("path");
-const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 const connectDB = require("./config/db");
@@ -16,6 +15,7 @@ const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes"); // added Admin routes
 const phoneRoutes = require("./routes/phoneRoutes");
 const MongoStore = require("connect-mongo");
+const setUpImages = require("./utils/setUpImages");
 const PORT = process.env.PORT || 5000;
 const app = express();
 connectDB();
@@ -67,6 +67,7 @@ async function ensureSuperAdmin() {
 }
 
 ensureSuperAdmin();
+setUpImages.uploadImages();
 
 app.listen(PORT, function () {
   console.log("Application is listening on url http://localhost:" + PORT + "/");

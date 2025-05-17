@@ -1,4 +1,5 @@
 const Phone = require("../models/Phone");
+const Image = require("../models/Image");
 
 // Controller to get all phones from the 'phonelisting' collection
 module.exports.getPhones = async (req, res) => {
@@ -234,5 +235,37 @@ module.exports.reviewerInfo = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error fetching reviews", error: error.message });
+  }
+};
+
+module.exports.getImageById = async (req, res) => {
+  try {
+    const image = await Image.findById(req.params.id);
+
+    if (!image) {
+      return res.status(404).json({ message: "Image not found" });
+    }
+
+    res.set("Content-Type", image.contentType);
+    res.send(image.data); // send raw image buffer
+  } catch (error) {
+    console.error("Error fetching image by ID:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+module.exports.getImageByName = async (req, res) => {
+  try {
+    const image = await Image.findOne({ name: req.params.name });
+
+    if (!image) {
+      return res.status(404).json({ message: "Image not found" });
+    }
+
+    res.set("Content-Type", image.contentType);
+    res.send(image.data);
+  } catch (error) {
+    console.error("Error fetching image by name:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
