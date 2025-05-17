@@ -7,3 +7,6 @@ export const deletePhone = (id) => axios.delete(`/phones/${id}`);
 
 export const phoneEnableDisable = (id, payload) =>
   axios.put(`/phones/${id}`, payload);
+
+export const toggleReviewHidden = (phoneId, reviewId, hidden) =>
+  axios.put(`/phones/${phoneId}/reviews/${reviewId}`, { hidden });

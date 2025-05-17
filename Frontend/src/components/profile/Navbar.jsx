@@ -1,30 +1,42 @@
-// src/components/Navbar.jsx
-import React from "react";
+import React, { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import SignOutModal from "../auth/SignOutModal";
 import "./Navbar.css";
-import LogoutButton from "../auth/LogoutButton";  
+import HomeLink from '../../components/profile/HomeLink';
 
-const Navbar = ({ setActiveTab }) => {
+export default function Navbar({ setActiveTab }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleConfirmSignOut = async () => {
+    setIsModalOpen(false);
+    await logout();
+    navigate('/signin');
+  };
+
+  const handleCancelSignOut = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <header className="profile-header">
       <nav>
-        <div className="logo">
-          <a href="/">Home</a>
-        </div>
+        <HomeLink className='profile-home-link' />
         <ul>
           <button onClick={() => setActiveTab("edit")}>Edit Profile</button>
-          <button onClick={() => setActiveTab("change")}>
-            Change Password
-          </button>
-          <button onClick={() => setActiveTab("manage")}>
-            Manage Listings
-          </button>
+          <button onClick={() => setActiveTab("change")}>Change Password</button>
+          <button onClick={() => setActiveTab("manage")}>Manage Listings</button>
           <button onClick={() => setActiveTab("view")}>View Comments</button>
-
-          <LogoutButton>Log Out</LogoutButton>
+          <button onClick={() => setIsModalOpen(true)}>Log Out</button>
         </ul>
       </nav>
+      <SignOutModal
+        isOpen={isModalOpen}
+        onConfirm={handleConfirmSignOut}
+        onCancel={handleCancelSignOut}
+      />
     </header>
   );
-};
-
-export default Navbar;
+}

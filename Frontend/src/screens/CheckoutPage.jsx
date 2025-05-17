@@ -22,12 +22,30 @@ const CheckoutPage = () => {
   };
 
   const handleConfirm = async () => {
-    if (user) {
+    try {
+      // Loop through all items in cart and send stock reduction request
+      for (const item of cartItems) {
+        await fetch(`/api/phone/${item.phone._id}/reduceStock`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            quantity: item.quantity,
+            userId: user._id
+          }),
+        });
+      }
+
       alert('Transaction confirmed!');
       await clearCart(user._id);
       navigate('/');
+    } catch (error) {
+      console.error('Checkout failed:', error);
+      alert('Something went wrong during checkout.');
     }
   };
+
 
   const totalPrice = cartItems.reduce(
     (sum, item) => sum + item.phone.price * item.quantity,

@@ -30,7 +30,7 @@ router.post('/api/cart', cartController.addToCart);
 router.get('/api/cart/:userId', cartController.getCart);
 
 // DELETE /api/cart → Remove item from cart
-router.delete('/api/cart', cartController.removeFromCart);
+router.delete('/api/cart/:userId/:phoneId', cartController.removeFromCart);
 
 // POST /api/wishlist → Add phone to wishlist
 router.post('/api/wishlist', wishlistController.addToWishlist);
@@ -45,4 +45,8 @@ router.post('/api/phone/:phoneId/reviews', phoneController.addReview);
 
 // get reviews with reviewer info
 router.get('/api/phone/:phoneId/reviews', phoneController.reviewerInfo);
+
+// phone stock
+router.post('/api/phone/:id/reduceStock', phoneController.reduceStock);
+
 module.exports = router;
