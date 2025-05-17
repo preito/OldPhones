@@ -30,6 +30,7 @@ const SignIn = ({ onSwitchToSignUp }) => {
   };
 
   return (
+    <div className="auth-wrapper">
     <div className="signin-container">
       <form className="signin-input-container" onSubmit={handleSubmit}>
         <h2 className="signin-title">Sign In</h2>
@@ -74,10 +75,11 @@ const SignIn = ({ onSwitchToSignUp }) => {
           </Link>
           <span className="divider">|</span>
           <Link to="/signup" className="signup-link">
-            Create Account
+            Create account
           </Link>
         </div>
       </form>
+    </div>
     </div>
   );
 };

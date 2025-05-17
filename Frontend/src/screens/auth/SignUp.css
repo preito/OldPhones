@@ -1,17 +1,4 @@
-/* signup.css */
 
-/* ensure full‐height and no default margins */
-html, body {
-    height: 100%;
-    margin: 0;
-  }
-  
-  body {
-    display: flex;
-    align-items: center;     /* vertical centering */
-    justify-content: center; /* horizontal centering */
-    background-color: #f5f5f5; /* optional light bg */
-  }
   
   .signup-container {
     /* force a fixed width */
@@ -24,6 +11,14 @@ html, body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
   
+
+  .signup-title {
+    font-size: 1.8rem;
+    color: #333;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
   
   .signup-input-container {
     display: flex;
@@ -55,19 +50,21 @@ html, body {
     border-color: #007bff;
   }
   
-  .signup-button {
-    margin-top: 1rem;
-    width: 100%;
-    padding: 0.75rem;
-    font-size: 1rem;
-    font-weight: 500;
-    color: #fff;
-    background-color: #28a745;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
+/* 2. Sign Up button */
+.signup-button {
+  margin-top: 1rem;        /* space above */
+  margin-bottom: 1.5rem;   /* extra space below before the link */
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #fff;
+  background-color: #28a745;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
   
   .signup-button:hover {
     background-color: #218838;
@@ -75,3 +72,20 @@ html, body {
   .error{
     color: rgb(220, 21, 21);
   }
+   
+  .signin-link,
+  .switch-button {
+    color: #007bff;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s;
+  }
+  
+  .signin-link:hover,
+  .switch-button:hover {
+    color: #0056b3;
+  }
+  

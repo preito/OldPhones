@@ -259,11 +259,9 @@ exports.changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
 
-  
     if (!req.session.user) {
       return res.status(401).json({ message: "Not authenticated." });
     }
-
 
     const user = await User.findById(req.session.user.id);
     if (!user) {
@@ -277,11 +275,9 @@ exports.changePassword = async (req, res) => {
         .json({ message: "Current password is incorrect." });
     }
 
-
     user.password = await bcrypt.hash(newPassword, 10);
     await user.save();
 
- 
     await sendEmail({
       to: user.email,
       subject: "Your password has been changed",

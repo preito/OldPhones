@@ -31,6 +31,7 @@ export default function ForgotPassword() {
   }
 
   return (
+    <div className="auth-wrapper">
     <div className="reset-container">
       <form className="reset-input-container" onSubmit={handleSubmit}>
         <h2 className="reset-title">Reset Password</h2>
@@ -63,6 +64,7 @@ export default function ForgotPassword() {
           Remembered? <Link to="/signin">Sign In</Link>
         </p>
       </form>
+    </div>
     </div>
   )
 }

@@ -78,8 +78,9 @@ export default function SignUp() {
   };
 
   return (
+    <div className="auth-wrapper">
     <div className="signup-container">
-      <h2 className="signup-title">Create Account</h2>
+      <h2 className="signup-title">Sign Up</h2>
       {errors.submit && <div className="error-message">{errors.submit}</div>}
 
       <form className="signup-input-container" onSubmit={handleSubmit}>
@@ -150,9 +151,10 @@ export default function SignUp() {
         </button>
       </form>
 
-      <p className="signin-link">
-        Already have an account? <Link to="/signin">Sign In</Link>
+      <p>
+        Already have an account? <Link to="/signin" className="signin-link">Sign In</Link>
       </p>
+    </div>
     </div>
   );
 }
