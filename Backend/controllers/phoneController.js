@@ -48,7 +48,7 @@ exports.getMyPhones = async (req, res) => {
     const phones = await Phone.find({ seller: sellerId })
       .populate("seller", "firstname lastname email")
       .populate("reviews.reviewer", "firstname lastname");
-      
+
     res.status(200).json(phones);
   } catch (error) {
     console.error("getMyPhones error:", error);
@@ -113,62 +113,56 @@ exports.deletePhone = async (req, res) => {
   }
 };
 
-
-
 exports.phoneEnableDisable = async (req, res) => {
-
   try {
     // Ensure user is logged in
-    const sellerId = req.session.user?.id
+    const sellerId = req.session.user?.id;
     if (!sellerId) {
-      return res.status(401).json({ message: 'Not authenticated.' })
+      return res.status(401).json({ message: "Not authenticated." });
     }
 
     // Find the phone
-    const phone = await Phone.findById(req.params.id)
+    const phone = await Phone.findById(req.params.id);
     if (!phone) {
-      return res.status(404).json({ message: 'Listing not found.' })
+      return res.status(404).json({ message: "Listing not found." });
     }
 
     // Verify ownership
     if (phone.seller.toString() !== sellerId) {
       return res.status(403).json({
-        message: "Forbidden: you can't modify someone else's listing"
-      })
+        message: "Forbidden: you can't modify someone else's listing",
+      });
     }
 
     //Validate input
-    if (typeof req.body.disabled !== 'boolean') {
-      return res.status(400).json({ message: '`disabled` must be a boolean.' })
+    if (typeof req.body.disabled !== "boolean") {
+      return res.status(400).json({ message: "`disabled` must be a boolean." });
     }
 
     //Flip the flag
-    phone.disabled = req.body.disabled
-    await phone.save()
+    phone.disabled = req.body.disabled;
+    await phone.save();
 
     // Return the updated state
     return res.json({
-      message: 'Listing status updated.',
+      message: "Listing status updated.",
       phone: {
-        _id:      phone._id,
-        disabled: phone.disabled
-      }
-    })
+        _id: phone._id,
+        disabled: phone.disabled,
+      },
+    });
   } catch (err) {
-    console.error('updatePhone error:', err)
-    return res.status(500).json({ message: 'Server error.' })
+    console.error("updatePhone error:", err);
+    return res.status(500).json({ message: "Server error." });
   }
-}
-
+};
 
 module.exports.addReview = async (req, res) => {
   const { rating, comment } = req.body;
   const userId = req.session.user?.id;
 
   if (!userId) {
-    return res
-      .status(401)
-      .json({ message: "Unauthorized User." });
+    return res.status(401).json({ message: "Unauthorized User." });
   }
 
   try {
@@ -240,17 +234,17 @@ module.exports.reviewerInfo = async (req, res) => {
 module.exports.reduceStock = async (req, res) => {
   const phoneId = req.params.id;
   const { quantity } = req.body;
-  console.log('Body:', req.body)
-  if (typeof quantity !== 'number' || quantity <= 0) {
-    return res.status(400).json({ message: 'Invalid quantity' });
+  console.log("Body:", req.body);
+  if (typeof quantity !== "number" || quantity <= 0) {
+    return res.status(400).json({ message: "Invalid quantity" });
   }
 
   try {
     const phone = await Phone.findById(phoneId);
-    if (!phone) return res.status(404).send('Phone not found');
+    if (!phone) return res.status(404).send("Phone not found");
 
     if (phone.stock < quantity) {
-      return res.status(400).json({ message: 'Not enough stock' });
+      return res.status(400).json({ message: "Not enough stock" });
     }
 
     phone.stock -= quantity;
@@ -259,7 +253,56 @@ module.exports.reduceStock = async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Error reducing stock' });
+    res.status(500).json({ message: "Error reducing stock" });
   }
 };
 
+exports.toggleReviewHidden = async (req, res) => {
+  try {
+    const sellerId = req.session.user?.id;
+    if (!sellerId) {
+      return res.status(401).json({ message: "Not authenticated." });
+    }
+
+    const { phoneId, reviewId } = req.params;
+    const { hidden } = req.body;
+    if (typeof hidden !== "boolean") {
+      return res.status(400).json({ message: "`hidden` must be boolean." });
+    }
+
+    // load the phone
+    const phone = await Phone.findById(phoneId);
+    if (!phone) {
+      return res.status(404).json({ message: "Listing not found." });
+    }
+    if (phone.seller.toString() !== sellerId) {
+      return res
+        .status(403)
+        .json({ message: "Forbidden: cannot modify someone else's listing" });
+    }
+
+    // modify the subdoc
+    const review = phone.reviews.id(reviewId);
+    if (!review) {
+      return res.status(404).json({ message: "Review not found." });
+    }
+    review.hidden = hidden;
+    await phone.save();
+
+    // re-fetch just this review with populated reviewer
+    const updated = await Phone.findById(phoneId)
+      .populate("reviews.reviewer", "firstname lastname")
+      .lean();
+
+    const updatedReview = updated.reviews.find(
+      (r) => r._id.toString() === reviewId
+    );
+    return res.json({
+      message: "Review visibility updated",
+      review: updatedReview,
+    });
+  } catch (err) {
+    console.error("toggleReviewHidden error:", err);
+    return res.status(500).json({ message: "Server error." });
+  }
+};

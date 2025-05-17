@@ -1,107 +1,106 @@
-// src/components/ViewComments.jsx
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../../context/AuthContext";          
+import { useAuth } from "../../context/AuthContext";
+import * as phoneApi from "../../api/phoneApi";
 import "./ViewComments.css";
 
-const ViewComments = () => {
-  const { user } = useAuth();                              
+export default function ViewComments() {
+  const { user } = useAuth();
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!user) return;                                      
-    console.log(user);
+    if (!user) return;
+    setLoading(true);
+    phoneApi
+      .getMyPhones()
+      .then((res) => setListings(res.data))
+      .catch((err) => {
+        console.error("Failed to load comments:", err);
+        setError("Could not load your comments.");
+      })
+      .finally(() => setLoading(false));
   }, [user]);
 
-  if (!user) {
-    return <p>Please sign in to view your comments.</p>;
-  }
+  const handleToggle = (phoneId, review) => {
+    phoneApi
+      .toggleReviewHidden(phoneId, review._id, !review.hidden)
+      .then((res) => {
+        setListings((prev) =>
+          prev.map((phone) =>
+            phone._id === phoneId
+              ? {
+                  ...phone,
+                  reviews: phone.reviews.map((r) =>
+                    r._id === review._id ? res.data.review : r
+                  ),
+                }
+              : phone
+          )
+        );
+      })
+      .catch((err) => console.error("Could not toggle comment:", err));
+  };
 
-
-  // Mock data for phone listings with reviews
-  const mockListings = [
-    {
-      "title": "Galaxy s III mini SM-G730V Verizon Cell Phone BLUE",
-      "brand": "Samsung",
-      "image": "imageurl",
-      "stock": 9,
-      "seller": "5f5237a4c1beb1523fa3db73",
-      "price": 56.0,
-      "reviews": [
-        {
-          "reviewer": "5f5237a4c1beb1523fa3db1f",
-          "rating": 3,
-          "comment": "Got phone yesterday all ... the charger!",
-          "hidden": "",
-        }],
-        "disabled": ""
-      },
-    {
-      id: 2,
-      title: "iPhone 12 Pro Max",
-      brand: "Apple",
-      image: "https://example.com/phone2.jpg",
-      reviews: [
-        {
-          reviewer: "5f5237a4cfa3db1f",
-          rating: 4,
-          comment: "Great phone, works perfectly!",
-          hidden: false,
-        },
-      ],
-    },
-  ];
+  if (!user) return <p>Please sign in to view your comments.</p>;
+  if (loading) return <p>Loading comments…</p>;
+  if (error) return <p className="error">{error}</p>;
 
   return (
     <div className="view-comments-container">
-      <h2>Your Listings' Reviews</h2>
-
-      {mockListings.map((listing) => (
-        <div key={listing.id} className="listing-reviews">
+      <h2>Your Listings’ Reviews</h2>
+      {listings.map((phone) => (
+        <div key={phone._id} className="listing-reviews">
           <div className="listing-header">
             <img
-              src={listing.image}
-              alt={listing.title}
+              src={phone.image}
+              alt={phone.title}
               className="listing-image"
             />
             <div className="listing-info">
-              <h3 className="phone-name">{listing.title}</h3>
-              <p className="phone-brand">{listing.brand}</p>
+              <h3 className="phone-name">{phone.title}</h3>
+              <p className="phone-brand">{phone.brand}</p>
             </div>
           </div>
-
           <div className="reviews-list">
-            {listing.reviews.map((review, index) => (
-              <div
-                key={index}
-                className={`review-card ${review.hidden ? "hidden" : ""}`}
-              >
-                <div className="review-header">
-                  <div className="review-rating">
-                    {[...Array(5)].map((_, i) => (
-                      <span
-                        key={i}
-                        className={`star ${i < review.rating ? "filled" : ""}`}
-                      >
-                        ★
-                      </span>
-                    ))}
+            {phone.reviews.length === 0 ? (
+              <p>No reviews yet.</p>
+            ) : (
+              phone.reviews.map((rev) => (
+                <div
+                  key={rev._id}
+                  className={`review-card ${rev.hidden ? "hidden" : ""}`}
+                >
+                  <div className="review-header">
+                    <div className="review-rating">
+                      {[...Array(5)].map((_, i) => (
+                        <span
+                          key={i}
+                          className={`star ${i < rev.rating ? "filled" : ""}`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                    <span className="reviewer-name">
+                      {rev.reviewer.firstname} {rev.reviewer.lastname}
+                    </span>
                   </div>
-                  <span className="reviewer-id">
-                    User ID: {review.reviewer}
-                  </span>
+                  <p className="review-text">{rev.comment}</p>
+                  <div className="review-actions">
+                    <button
+                      className="visibility-toggle"
+                      onClick={() => handleToggle(phone._id, rev)}
+                    >
+                      {rev.hidden ? "Show Review" : "Hide Review"}
+                    </button>
+                  </div>
                 </div>
-                <p className="review-text">{review.comment}</p>
-                <div className="review-actions">
-                  <button className="visibility-toggle">
-                    {review.hidden ? "Show Review" : "Hide Review"}
-                  </button>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       ))}
     </div>
   );
-};
-
-export default ViewComments;
+}

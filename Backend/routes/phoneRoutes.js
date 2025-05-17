@@ -7,6 +7,7 @@ const {
   createPhone,
   deletePhone,
   phoneEnableDisable,
+  toggleReviewHidden
 } = require("../controllers/phoneController.js");
 
 // GET /api/phones → Get all phones
@@ -19,5 +20,6 @@ router.get("/api/phones/my-listings", getMyPhones);
 router.post("/api/phones/create-phone", createPhone);
 router.delete("/api/phones/:id", deletePhone);
 router.put("/api/phones/:id", phoneEnableDisable);
+router.put('/api/phones/:phoneId/reviews/:reviewId', toggleReviewHidden);
 
 module.exports = router;
