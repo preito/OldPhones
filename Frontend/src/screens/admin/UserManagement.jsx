@@ -118,7 +118,7 @@ export default function UserManagement() {
       <input
         type="text"
         placeholder="Search by name or email"
-        className="w-full max-w-md px-4 py-2 border rounded mb-4 mx-auto block"
+        className="w-full px-4 py-2 border rounded mb-4 mx-auto block"
         value={searchTerm}
         onChange={(e) => {
           setSearchTerm(e.target.value);
@@ -133,11 +133,11 @@ export default function UserManagement() {
           <table className="w-full min-w-[700px] table-auto border border-gray-300">
             <thead className="bg-gray-100">
               <tr>
-                <th className="px-4 py-2 text-left">Full Name</th>
-                <th className="px-4 py-2 text-left">Email</th>
-                <th className="px-4 py-2 text-left">Created At</th>
-                <th className="px-4 py-2 text-left">Actions</th>
-                <th className="px-4 py-2 text-left">Details</th>
+                <th className="px-4 py-2 text-center">Full Name</th>
+                <th className="px-4 py-2 text-center">Email</th>
+                <th className="px-4 py-2 text-center">Created At</th>
+                <th className="px-4 py-2 text-center">Actions</th>
+                <th className="px-4 py-2 text-center">Details</th>
               </tr>
             </thead>
             <tbody>
@@ -145,11 +145,12 @@ export default function UserManagement() {
                 const edited = editedUsers[user._id] || {};
                 const createdDate = new Date(user.createdAt).toLocaleDateString();
                 return (
-                  <tr key={user._id} className="border-t">
+                  <tr key={user._id} className="border-t text-center">
                     <td className="px-4 py-2">
                       <input
                         type="text"
-                        className="w-full border rounded px-2 py-1"
+                        placeholder="First"
+                        className="w-fit border rounded px-2 py-1"
                         value={edited.firstname ?? user.firstname}
                         onChange={(e) =>
                           handleEditChange(user._id, "firstname", e.target.value)
@@ -157,7 +158,8 @@ export default function UserManagement() {
                       />
                       <input
                         type="text"
-                        className="w-full border rounded px-2 py-1 mt-1"
+                        placeholder="Last"
+                        className="w-fit border rounded px-2 py-1 mt-1"
                         value={edited.lastname ?? user.lastname}
                         onChange={(e) =>
                           handleEditChange(user._id, "lastname", e.target.value)
@@ -167,6 +169,7 @@ export default function UserManagement() {
                     <td className="px-4 py-2">
                       <input
                         type="email"
+                        placeholder="Email"
                         className="w-full border rounded px-2 py-1"
                         value={edited.email ?? user.email}
                         onChange={(e) =>

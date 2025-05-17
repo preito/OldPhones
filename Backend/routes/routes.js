@@ -7,8 +7,8 @@ const wishlistController = require('../controllers/wishlistController');
 
 var router = express.Router();
 
-router.get('/api', controller.test)
 router.get('/api/phone', phoneController.getPhones);
+
 router.post('/api/user/check-credentials', userController.checkUserByCredentials);
 
 // GET /api/phones → Get all phones

@@ -13,4 +13,12 @@ router.delete('/users/:id', adminController.deleteUser);
 
 router.patch('/users/:id/toggle-disable', adminController.toggleUserDisable);
 
+router.get('/phones', adminController.getPaginatedPhones);
+
+router.put("/phones/:id", adminController.updatePhone);
+
+router.put("/phones/:id/toggle-disable", adminController.togglePhoneDisable);
+
+router.delete("/phones/:id", adminController.deletePhone);
+
 module.exports = router;
