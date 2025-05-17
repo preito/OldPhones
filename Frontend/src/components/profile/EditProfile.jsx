@@ -1,59 +1,63 @@
-import React, { useState, useEffect } from "react"
-import { useAuth } from "../../context/AuthContext"
-import * as authApi from "../../api/authApi"
-import "./EditProfile.css"
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../context/AuthContext";
+import * as authApi from "../../api/authApi";
+import "./EditProfile.css";
 
 export default function EditProfile() {
-  const { user, loading, refreshUser } = useAuth()
-  const [formData, setFormData]       = useState({ firstName: "", lastName: "", email: "" })
-  const [showConfirm, setShowConfirm] = useState(false)
-  const [password, setPassword]       = useState("")
-  const [error, setError]             = useState("")
-  const [submitting, setSubmitting]   = useState(false)
+  const { user, loading, refreshUser } = useAuth();
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+  });
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!loading && user) {
       setFormData({
         firstName: user.firstname,
-        lastName:  user.lastname,
-        email:     user.email,
-      })
+        lastName: user.lastname,
+        email: user.email,
+      });
     }
-  }, [loading, user])
+  }, [loading, user]);
 
-  const handleChange = e => {
-    const { name, value } = e.target
-    setFormData(fd => ({ ...fd, [name]: value }))
-  }
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((fd) => ({ ...fd, [name]: value }));
+  };
 
-  const handleSubmit = e => {
-    e.preventDefault()
-    setError("")
-    setShowConfirm(true)
-  }
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setError("");
+    setShowConfirm(true);
+  };
 
   const handleConfirm = async () => {
     if (!password) {
-      setError("Password is required to confirm.")
-      return
+      setError("Password is required to confirm.");
+      return;
     }
 
-    setSubmitting(true)
+    setSubmitting(true);
     try {
-      await authApi.updateProfile({ ...formData, password })
+      await authApi.updateProfile({ ...formData, password });
       // refresh the context user so useEffect runs again
-      await refreshUser()
-      alert("Profile updated successfully.")
-      setShowConfirm(false)
+      await refreshUser();
+      alert("Profile updated successfully.");
+      setShowConfirm(false);
     } catch (err) {
-      setError(err.response?.data?.message || "Update failed.")
+      setError(err.response?.data?.message || "Update failed.");
     } finally {
-      setSubmitting(false)
-      setPassword("")
+      setSubmitting(false);
+      setPassword("");
     }
-  }
+  };
 
-  if (loading) return <div>Loading profile…</div>
+  if (loading) return <div>Loading profile…</div>;
 
   return (
     <div className="edit-profile-container">
@@ -102,12 +106,15 @@ export default function EditProfile() {
               type="password"
               placeholder="Current Password"
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               disabled={submitting}
             />
             {error && <p className="error-text">{error}</p>}
             <div className="modal-actions">
-              <button onClick={() => setShowConfirm(false)} disabled={submitting}>
+              <button
+                onClick={() => setShowConfirm(false)}
+                disabled={submitting}
+              >
                 Cancel
               </button>
               <button
@@ -115,12 +122,12 @@ export default function EditProfile() {
                 disabled={submitting}
                 className="confirm-button"
               >
-                {submitting ? 'Saving…' : 'Confirm'}
+                {submitting ? "Saving…" : "Confirm"}
               </button>
             </div>
           </div>
         </div>
       )}
     </div>
-  )
+  );
 }
