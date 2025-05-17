@@ -15,7 +15,7 @@ const PhoneCard = ({ phone, onClick }) => {
   return (
     <div className="phone-card" onClick={() => onClick && onClick(phone)}>
       <img
-        src={`/images/${phone.brand}.jpeg`}
+        src={`/api/phone/image/name/${encodeURIComponent(phone.brand)}.jpeg`}
         alt={phone.title}
         className="phone-image"
       />

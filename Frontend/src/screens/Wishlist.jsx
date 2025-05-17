@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 const Wishlist = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
-  const { wishlistItems, setWishlistItems, removeFromWishlist, addToCart } = useContext(CartContext);
+  const { wishlistItems, setWishlistItems, removeFromWishlist, addToCart, clearWishlist } = useContext(CartContext);
 
   useEffect(() => {
     if (user?._id) {
@@ -31,14 +31,36 @@ const Wishlist = () => {
       <h2>Wishlist</h2>
       <button onClick={() => navigate(-1)}>Back</button>
 
+      {/* Show clear button only when wishlist has items */}
+      {wishlistItems.length > 0 && (
+        <button
+          onClick={() => {
+            if (window.confirm("Are you sure you want to clear your wishlist?")) {
+              clearWishlist(user._id);
+            }
+          }}
+          style={{ margin: '10px 0' }}
+        >
+          Clear Wishlist
+        </button>
+      )}
+
       {wishlistItems.length === 0 ? (
         <p>Your wishlist is empty.</p>
       ) : (
         <ul>
           {wishlistItems.map((item, index) => {
-            if (!item || !item.title) return null; 
+            if (!item || !item.title) return null;
+
             return (
-              <li key={index} style={{ marginBottom: '20px', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
+              <li
+                key={index}
+                style={{
+                  marginBottom: '20px',
+                  borderBottom: '1px solid #ccc',
+                  paddingBottom: '10px',
+                }}
+              >
                 <h4>{item.title}</h4>
                 <p>Brand: {item.brand}</p>
                 <p>Price: ${item.price}</p>
@@ -47,7 +69,7 @@ const Wishlist = () => {
                   onClick={() => {
                     if (user?._id) {
                       addToCart(item, 1, user._id);
-                      alert("Item added to cart!");
+                      alert('Item added to cart!');
                     }
                   }}
                 >

@@ -1,5 +1,5 @@
 var express = require('express');
-var controller = require('../controllers/controller');
+// var controller = require('../controllers/controller');
 const phoneController= require('../controllers/phoneController');
 const userController = require('../controllers/userController');
 const cartController = require('../controllers/cartController');
@@ -32,6 +32,9 @@ router.get('/api/cart/:userId', cartController.getCart);
 // DELETE /api/cart → Remove item from cart
 router.delete('/api/cart/:userId/:phoneId', cartController.removeFromCart);
 
+// update cart quantity
+router.put('/api/cart/update', cartController.updateCartQuantity);
+
 // POST /api/wishlist → Add phone to wishlist
 router.post('/api/wishlist', wishlistController.addToWishlist);
 
@@ -48,5 +51,14 @@ router.get('/api/phone/:phoneId/reviews', phoneController.reviewerInfo);
 
 // phone stock
 router.post('/api/phone/:id/reduceStock', phoneController.reduceStock);
+
+// Save Transaction
+router.post('/api/user/save-transaction', userController.saveTransaction);
+
+// Get user transaction
+router.get('/api/user/:userId/transactions', userController.getTransactions);
+
+// get all transactions
+router.get('/api/admin/transactions', userController.getAllTransactions);
 
 module.exports = router;
