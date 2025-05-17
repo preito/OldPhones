@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import * as authApi from "../../api/authApi";
 import "./ResetPassword.css";
+import HomeLink from "../../components/profile/HomeLink";
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -49,40 +50,43 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="reset-container">
-      <form className="reset-input-container" onSubmit={handleSubmit}>
-        <h2 className="reset-title">Set a New Password</h2>
-        {status && <p className="success-text">{status}</p>}
-        {error && <p className="error-text">{error}</p>}
+    <div className="auth-wrapper">
+     <HomeLink className="home-icon" />
+      <div className="signup-container">
+        <form className="reset-input-container" onSubmit={handleSubmit}>
+          <h2 className="reset-title">Set a New Password</h2>
+          {status && <p className="success-text">{status}</p>}
+          {error && <p className="error-text">{error}</p>}
 
-        <div className="reset-input-item">
-          <label>New Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={loading}
-            placeholder="••••••••"
-          />
-        </div>
-        <div className="reset-input-item">
-          <label>Confirm Password</label>
-          <input
-            type="password"
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            disabled={loading}
-            placeholder="••••••••"
-          />
-        </div>
-        <button type="submit" className="reset-button" disabled={loading}>
-          {loading ? "Saving…" : "Save New Password"}
-        </button>
+          <div className="reset-input-item">
+            <label>New Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
+              placeholder="••••••••"
+            />
+          </div>
+          <div className="reset-input-item">
+            <label>Confirm Password</label>
+            <input
+              type="password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              disabled={loading}
+              placeholder="••••••••"
+            />
+          </div>
+          <button type="submit" className="reset-button" disabled={loading}>
+            {loading ? "Saving…" : "Save New Password"}
+          </button>
 
-        <p className="reset-links">
-          <Link to="/signin">Back to Sign In</Link>
-        </p>
-      </form>
+          <p className="reset-links">
+            <Link to="/signin">Back to Sign In</Link>
+          </p>
+        </form>
+      </div>
     </div>
   );
 }

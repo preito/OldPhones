@@ -50,7 +50,7 @@
 
 .profile-header nav ul {
   display: flex;
-  margin-left: auto; /* Push nav items to the right */
+  margin-left: auto; 
   list-style: none;
   gap: 10px;
 }

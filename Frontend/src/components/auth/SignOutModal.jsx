@@ -1,8 +1,9 @@
-import React from 'react'
-import './SignOutModal.css'
+import React from 'react';
+import './SignOutModal.css';
 
 export default function SignOutModal({ isOpen, onConfirm, onCancel }) {
-  if (!isOpen) return null
+  if (!isOpen) return null;
+
   return (
     <div className="signout-modal-overlay">
       <div className="signout-modal-card">
@@ -11,14 +12,20 @@ export default function SignOutModal({ isOpen, onConfirm, onCancel }) {
           Are you sure you want to sign out?
         </p>
         <div className="signout-modal-buttons">
-          <button className="signout-modal-button cancel-button" onClick={onCancel}>
+          <button
+            className="signout-modal-button cancel-button"
+            onClick={onCancel}
+          >
             Cancel
           </button>
-          <button className="signout-modal-button confirm-button" onClick={onConfirm}>
+          <button
+            className="signout-modal-button confirm-button"
+            onClick={onConfirm}
+          >
             Sign Out
           </button>
         </div>
       </div>
     </div>
-  )
+  );
 }

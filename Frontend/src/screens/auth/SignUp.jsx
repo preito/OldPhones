@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import * as authApi from "../../api/authApi";
+import HomeLink from '../../components/profile/HomeLink';
 import "./SignUp.css";
 
 export default function SignUp() {
@@ -78,7 +79,10 @@ export default function SignUp() {
   };
 
   return (
+    
+
     <div className="auth-wrapper">
+        <HomeLink className="home-icon" />
     <div className="signup-container">
       <h2 className="signup-title">Sign Up</h2>
       {errors.submit && <div className="error-message">{errors.submit}</div>}
