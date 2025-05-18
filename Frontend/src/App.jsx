@@ -21,7 +21,7 @@ import Wishlist from "./screens/Wishlist";
 import ProtectedRoute from "./components/protectedRoutes/ProtectedProfileRoute";
 
 import AdminLayout from "./components/admin/AdminLayout";
-import AdminHome from "./screens/admin/AdminHome";
+import SalesLog from "./screens/admin/SalesLog";
 import UserManagement from "./screens/admin/UserManagement";
 import ListingManagement from "./screens/admin/ListingManagement";
 import ContentModeration from "./screens/admin/ContentModeration";
@@ -52,8 +52,8 @@ function App() {
 
               {/* Admin routes (will add separate protection later) */}
               <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<AdminHome />} />
-                <Route path="home" element={<AdminHome />} />
+                <Route index element={<SalesLog />} />
+                <Route path="home" element={<SalesLog />} />
                 <Route path="users" element={<UserManagement />} />
                 <Route path="listings" element={<ListingManagement />} />
                 <Route path="content" element={<ContentModeration />} />
