@@ -18,6 +18,18 @@ const userSchema = new mongoose.Schema(
         quantity: { type: Number, default: 1 },
       },
     ],
+    transactions: [
+      {
+        items: [
+          {
+            phone: { type: mongoose.Schema.Types.ObjectId, ref: "Phone" },
+            quantity: Number,
+          }
+        ],
+        total: Number,
+        date: { type: Date, default: Date.now }
+      }
+    ],
     verified: { type: Boolean, default: false },
     verificationToken: { type: String },
     verificationTokenExpires: { type: Date },

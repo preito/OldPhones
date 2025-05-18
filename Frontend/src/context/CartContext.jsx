@@ -95,22 +95,23 @@ export const CartProvider = ({ children }) => {
 
   const updateQuantity = async (phone, quantity, userId) => {
     try {
-      const res = await fetch(`api/cart`, {
-        method: 'POST',
+      const res = await fetch('/api/cart/update', {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, phoneId: phone._id, quantity })
       });
 
       const data = await res.json();
       if (res.ok) {
-        setCartItems(data.cart);
+        setCartItems(data); // backend returns full updated cart
       } else {
-        console.error('Failed to update quantity:', data.message);
+        console.error('Failed to update cart quantity:', data.message);
       }
-    } catch (error) {
-      console.error('Error updating quantity:', error);
+    } catch (err) {
+      console.error('Cart quantity update error:', err);
     }
   };
+
 
   const removeFromCart = async (phone, userId) => {
     try {
@@ -131,8 +132,19 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = async (userId) => {
     for (const item of cartItems) {
-      await removeFromCart(item.phone, userId);
+      if (item.phone && item.phone._id) {
+        await removeFromCart(item.phone, userId);
+      }
     }
+  };
+
+  const clearWishlist = async (userId) => {
+    for (const item of wishlistItems) {
+      if (item && item._id) {
+        await removeFromWishlist(item, userId);
+      }
+    }
+    setWishlistItems([]); // optional: force-clear state
   };
 
   return (
@@ -146,6 +158,7 @@ export const CartProvider = ({ children }) => {
       addToWishlist,
       removeFromWishlist,
       setWishlistItems,
+      clearWishlist,
       fetchCart
     }}>
       {children}
