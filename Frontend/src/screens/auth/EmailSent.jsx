@@ -5,6 +5,7 @@ import './EmailSent.css'
 
 export default function EmailSent() {
   return (
+   <div className="auth-wrapper">
     <div className="email-sent-container">
       <div className="email-sent-card">
         {/* Checkmark icon */}
@@ -28,5 +29,6 @@ export default function EmailSent() {
         </Link>
       </div>
     </div>
+      </div>
   )
 }
