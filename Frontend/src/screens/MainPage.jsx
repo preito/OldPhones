@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 
 const MainPage = () => {
   const navigate = useNavigate();
-  const { cartItems, addToCart, wishlistItems, addToWishlist, fetchCart } = useContext(CartContext);
+  const { cartItems, addToCart, wishlistItems, addToWishlist, fetchCart, fetchWishlist } = useContext(CartContext);
   const { user, logout, loading } = useAuth();
 
   const [phones, setPhones] = useState([]);
@@ -20,6 +20,7 @@ const MainPage = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [brandFilter, setBrandFilter] = useState('');
   const [maxPrice, setMaxPrice] = useState(2000);
+  const [maxPriceCap, setMaxPriceCap] = useState(2000);
   const [tempBrandFilter, setTempBrandFilter] = useState('');
   const [tempMaxPrice, setTempMaxPrice] = useState(2000);
   const [visibleReviewCount, setVisibleReviewCount] = useState(3);
@@ -83,32 +84,42 @@ const MainPage = () => {
   };
 
   useEffect(() => {
-    if (viewState === 'home') {
+    if (viewState === 'home' || viewState === 'search') {
       fetch(`/api/phone/getPhoneSeller`)
         .then(res => res.json())
         .then(data => {
           setPhones(data);
+          setMaxPriceCap(Math.ceil(Math.max(...data.map(p => p.price || 0))));
+          setTempMaxPrice(Math.ceil(Math.max(...data.map(p => p.price || 0)))); 
+          if (viewState === 'home') {
+            const soldOut = data
+              .filter(p => !p.disabled && p.stock > 0)
+              .sort((a, b) => a.stock - b.stock)
+              .slice(0, 5);
 
-          const soldOut = data
-            .filter(p => !p.disabled && p.stock > 0)
-            .sort((a, b) => a.stock - b.stock)
-            .slice(0, 5);
+            const best = data
+              .filter(p => !p.disabled && p.reviews.length >= 2)
+              .sort((a, b) => {
+                const avgA = a.reviews.reduce((s, r) => s + r.rating, 0) / a.reviews.length;
+                const avgB = b.reviews.reduce((s, r) => s + r.rating, 0) / b.reviews.length;
+                return avgB - avgA;
+              })
+              .slice(0, 5);
 
-          const best = data
-            .filter(p => !p.disabled && p.reviews.length >= 2)
-            .sort((a, b) => {
-              const avgA = a.reviews.reduce((s, r) => s + r.rating, 0) / a.reviews.length;
-              const avgB = b.reviews.reduce((s, r) => s + r.rating, 0) / b.reviews.length;
-              return avgB - avgA;
-            })
-            .slice(0, 5);
-
-          setSoldOutPhones(soldOut);
-          setBestSellers(best);
+            setSoldOutPhones(soldOut);
+            setBestSellers(best);
+          }
         })
         .catch(err => console.error('Error fetching phones:', err));
     }
   }, [viewState]);
+  useEffect(() => {
+  if (user && user._id) {
+    fetchCart(user._id);
+    fetchWishlist(user._id);
+  }
+}, [user]);
+
 
   if (loading) {
     return (
@@ -169,12 +180,14 @@ const MainPage = () => {
                 <option value="HTC">HTC</option>
               </select>
 
-              <label className="text-sm ml-4">Max Price: ${tempMaxPrice}</label>
+              <label className="text-sm ml-4">
+                Max Price: ${tempMaxPrice} / ${maxPriceCap}
+              </label>
               <input
                 type="range"
                 min="0"
-                max="2000"
-                step="100"
+                max={maxPriceCap}
+                step="25"
                 value={tempMaxPrice}
                 onChange={(e) => setTempMaxPrice(Number(e.target.value))}
               />
