@@ -1,7 +1,9 @@
-import { Navigate } from "react-router-dom";
+
+import React from "react";
+import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
-export default function ProtectedRoute({ children }) {
+export default function ProtectedRoute() {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -9,8 +11,10 @@ export default function ProtectedRoute({ children }) {
   }
 
   if (!user) {
-    return <div>Please Sign In to view your profile</div>;
+    // not logged in? bounce back to home
+    return <Navigate to="/" replace />;
   }
 
-  return children;
+  // logged in! render whatever nested route matched
+  return <Outlet />;
 }
