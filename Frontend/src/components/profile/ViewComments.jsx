@@ -6,8 +6,12 @@ import "./ViewComments.css";
 export default function ViewComments() {
   const { user } = useAuth();
   const [listings, setListings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState("");
+
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
     if (!user) return;
@@ -42,14 +46,20 @@ export default function ViewComments() {
       .catch((err) => console.error("Could not toggle comment:", err));
   };
 
-  if (!user) return <p>Please sign in to view your comments.</p>;
+  if (!user)   return <p>Please sign in to view your comments.</p>;
   if (loading) return <p>Loading comments…</p>;
-  if (error) return <p className="error">{error}</p>;
+  if (error)   return <p className="error">{error}</p>;
+
+
+  const totalPages = Math.ceil(listings.length / itemsPerPage);
+  const startIdx   = (currentPage - 1) * itemsPerPage;
+  const pagePhones = listings.slice(startIdx, startIdx + itemsPerPage);
 
   return (
     <div className="view-comments-container">
       <h2>Your Listings’ Reviews</h2>
-      {listings.map((phone) => (
+
+      {pagePhones.map((phone) => (
         <div key={phone._id} className="listing-reviews">
           <div className="listing-header">
             <img
@@ -62,6 +72,7 @@ export default function ViewComments() {
               <p className="phone-brand">{phone.brand}</p>
             </div>
           </div>
+
           <div className="reviews-list">
             {phone.reviews.length === 0 ? (
               <p>No reviews yet.</p>
@@ -101,6 +112,33 @@ export default function ViewComments() {
           </div>
         </div>
       ))}
+
+
+      {totalPages > 1 && (
+        <div className="pagination">
+          <button
+            onClick={() => setCurrentPage((p) => p - 1)}
+            disabled={currentPage === 1}
+          >
+            Prev
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i + 1}
+              className={currentPage === i + 1 ? "active" : ""}
+              onClick={() => setCurrentPage(i + 1)}
+            >
+              {i + 1}
+            </button>
+          ))}
+          <button
+            onClick={() => setCurrentPage((p) => p + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }

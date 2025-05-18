@@ -1,4 +1,3 @@
-// src/components/profile/ManageListings.jsx
 import React, { useState, useEffect } from "react";
 import * as phoneApi from "../../api/phoneApi";
 import "./ManageListings.css";
@@ -16,11 +15,16 @@ const BRANDS = [
 ];
 
 export default function ManageListings() {
+
   const [listings, setListings] = useState([]);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState("");
 
-  // State for the Add‐modal
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
+
+
   const [showAdd, setShowAdd]       = useState(false);
   const [newListing, setNewListing] = useState({
     title: "", brand: "", image: "", price: "", stock: ""
@@ -28,7 +32,6 @@ export default function ManageListings() {
   const [addError, setAddError] = useState("");
   const [adding, setAdding]     = useState(false);
 
-  // Fetch listings
   const loadListings = async () => {
     setLoading(true);
     try {
@@ -45,22 +48,22 @@ export default function ManageListings() {
     loadListings();
   }, []);
 
-  // Generic input change
+
   const handleNewChange = (e) => {
     const { name, value } = e.target;
     setNewListing(prev => ({ ...prev, [name]: value }));
   };
 
-  // Brand dropdown change → also auto-set the image URL
+ 
   const handleBrandChange = (e) => {
     const brand = e.target.value;
-    const image = brand 
+    const image = brand
       ? `/api/phone/image/name/${encodeURIComponent(brand)}.jpeg`
       : "";
     setNewListing(prev => ({ ...prev, brand, image }));
   };
 
-  // Submit new listing
+
   const handleAdd = async () => {
     setAddError("");
     const { title, brand, image, price, stock } = newListing;
@@ -87,7 +90,7 @@ export default function ManageListings() {
     }
   };
 
-  // Delete a listing
+
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this listing?")) return;
     try {
@@ -98,12 +101,11 @@ export default function ManageListings() {
     }
   };
 
-  // Toggle enable/disable
+
   const handleToggle = async (listing) => {
     const newDisabled = !listing.disabled;
     try {
-     const { data } = await phoneApi.phoneEnableDisable(listing._id, { disabled: newDisabled });
-
+      const { data } = await phoneApi.phoneEnableDisable(listing._id, { disabled: newDisabled });
       setListings(prev =>
         prev.map(l =>
           l._id === listing._id
@@ -116,11 +118,18 @@ export default function ManageListings() {
     }
   };
 
+
+  const indexOfLast   = currentPage * itemsPerPage;
+  const indexOfFirst  = indexOfLast - itemsPerPage;
+  const currentItems  = listings.slice(indexOfFirst, indexOfLast);
+  const totalPages    = Math.ceil(listings.length / itemsPerPage);
+
   if (loading) return <p>Loading your listings…</p>;
   if (error)   return <p className="error">{error}</p>;
 
   return (
     <div className="manage-listings-container">
+     
       <div className="listings-header">
         <h2>Manage Your Listings</h2>
         <button className="add-listing-button" onClick={() => setShowAdd(true)}>
@@ -128,7 +137,7 @@ export default function ManageListings() {
         </button>
       </div>
 
-      {/* Add‐listing Modal */}
+ 
       {showAdd && (
         <div className="modal-overlay">
           <div className="modal-card">
@@ -155,16 +164,14 @@ export default function ManageListings() {
                 disabled={adding}
               >
                 <option value="">Select Brand</option>
-                {BRANDS.map((b) => (
-                  <option key={b} value={b}>{b}</option>
-                ))}
+                {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
               </select>
             </div>
 
             <div className="modal-input-item">
               <label>Price</label>
               <div className="input-with-prefix">
-            
+                <span className="prefix">$</span>
                 <input
                   name="price"
                   type="number"
@@ -205,12 +212,12 @@ export default function ManageListings() {
         </div>
       )}
 
-      {/* Existing listings */}
-      {listings.length === 0 ? (
+
+      {currentItems.length === 0 ? (
         <p>You have no listings yet.</p>
       ) : (
         <div className="listings-grid">
-          {listings.map((listing) => {
+          {currentItems.map(listing => {
             const isActive = !listing.disabled;
             return (
               <div
@@ -218,9 +225,7 @@ export default function ManageListings() {
                 className={`listing-card ${isActive ? "" : "inactive"}`}
               >
                 <div className="listing-status">
-                  <span
-                    className={`status-badge ${isActive ? "active" : "inactive"}`}
-                  >
+                  <span className={`status-badge ${isActive ? "active" : "inactive"}`}>
                     {isActive ? "Active" : "Inactive"}
                   </span>
                 </div>
@@ -253,6 +258,35 @@ export default function ManageListings() {
               </div>
             );
           })}
+        </div>
+      )}
+
+
+      {totalPages > 1 && (
+        <div className="pagination">
+          <button
+            onClick={() => setCurrentPage(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            Prev
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i + 1}
+              className={currentPage === i + 1 ? "active" : ""}
+              onClick={() => setCurrentPage(i + 1)}
+            >
+              {i + 1}
+            </button>
+          ))}
+
+          <button
+            onClick={() => setCurrentPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
         </div>
       )}
     </div>
