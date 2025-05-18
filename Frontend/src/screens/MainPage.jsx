@@ -217,12 +217,7 @@ const MainPage = () => {
             <p><strong>Stock:</strong> {selectedPhone.stock}</p>
             <p><strong>Price:</strong> ${selectedPhone.price}</p>
             <p><strong>Seller:</strong> {selectedPhone.seller?.firstname} {selectedPhone.seller?.lastname || 'Unknown Seller'}</p>
-            <p><strong>In Cart:</strong> {
-              cartItems.find(item =>
-                `${item.phone.title}_${item.phone.brand}_${item.phone.price}` ===
-                `${selectedPhone.title}_${selectedPhone.brand}_${selectedPhone.price}`
-              )?.quantity || 0
-            }</p>
+            
 
             <h3 className="mt-6 text-xl font-semibold">Reviews</h3>
             {selectedPhone.reviews
@@ -264,6 +259,12 @@ const MainPage = () => {
             <div className="mt-6 space-y-4">
               <div>
                 <h3 className="text-lg font-semibold">Add to Cart</h3>
+                <p><strong>In Cart:</strong> {
+                  cartItems.find(item =>
+                    `${item.phone.title}_${item.phone.brand}_${item.phone.price}` ===
+                    `${selectedPhone.title}_${selectedPhone.brand}_${selectedPhone.price}`
+                  )?.quantity || 0
+                }</p>
                 <input
                   type="number"
                   min="1"
