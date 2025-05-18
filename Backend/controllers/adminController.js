@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Phone = require('../models/Phone');
+const Transaction = require('../models/Transaction');
 const bcrypt = require("bcrypt");
 
 exports.getPaginatedUsers = async (req, res) => {
@@ -340,6 +341,35 @@ exports.toggleReviewHidden = async (req, res) => {
   } catch (err) {
     console.error("Error toggling review hidden status:", err);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.getPaginatedTransactions = async (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+
+    const skip = (page - 1) * limit;
+
+    const [transactions, total] = await Promise.all([
+      Transaction.find()
+        .sort({ timestamp: -1 }) // newest first
+        .skip(skip)
+        .limit(Number(limit))
+        .populate('buyer', 'firstname lastname') // populate buyer name
+        .populate('items.phone', 'title'), // populate phone title
+      Transaction.countDocuments()
+    ]);
+    res.status(200).json({
+      data: transactions,
+      meta: {
+        total,
+        page: Number(page),
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (err) {
+    console.error('Failed to fetch transactions:', err);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 

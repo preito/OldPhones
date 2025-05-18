@@ -65,3 +65,26 @@ export const deletePhone = async (id) => {
   return res.data;
 };
 
+export const fetchSalesLogs = async ({ page = 1, limit = 10 }) => {
+  const response = await axios.get('/admin/transactions', {
+    params: { page, limit },
+  });
+
+  // Transform backend data to frontend-friendly format
+  const data = response.data.data.map((tx) => ({
+    _id: tx._id,
+    timestamp: tx.timestamp,
+    buyerName: `${tx.buyer.firstname} ${tx.buyer.lastname}`,
+    items: tx.items.map((item) => ({
+      name: item.phone?.title || 'Unknown Phone',
+      quantity: item.quantity,
+    })),
+    total: tx.total,
+  }));
+
+  return {
+    data,
+    meta: response.data.meta,
+  };
+};
+

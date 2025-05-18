@@ -25,4 +25,6 @@ router.get("/api/admin/reviews", adminController.getModeratedReviews);
 
 router.patch('/api/admin/phones/:phoneId/reviews/:reviewerId/toggle-hidden', adminController.toggleReviewHidden);
 
+router.get('/api/admin/transactions', adminController.getPaginatedTransactions);
+
 module.exports = router;

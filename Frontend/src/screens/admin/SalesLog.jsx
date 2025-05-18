@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-// import { fetchSalesLogs } from '../../api/adminApi'; // Assumes this exists
+import { fetchSalesLogs } from '../../api/adminApi'; // Adjust path if needed
 
 const SalesLog = () => {
   const [logs, setLogs] = useState([]);
@@ -9,7 +9,10 @@ const SalesLog = () => {
     page: 1,
     limit: 10,
   });
-  const [meta, setMeta] = useState({});
+  const [meta, setMeta] = useState({
+    page: 1,
+    pages: 1,
+  });
 
   useEffect(() => {
     const loadLogs = async () => {
@@ -77,14 +80,14 @@ const SalesLog = () => {
         <div className="space-x-2">
           <button
             disabled={filters.page === 1}
-            onClick={() => setFilters({ ...filters, page: filters.page - 1 })}
+            onClick={() => setFilters((prev) => ({ ...prev, page: prev.page - 1 }))}
             className="px-3 py-1 border rounded disabled:opacity-50"
           >
             Prev
           </button>
           <button
             disabled={filters.page === meta.pages}
-            onClick={() => setFilters({ ...filters, page: filters.page + 1 })}
+            onClick={() => setFilters((prev) => ({ ...prev, page: prev.page + 1 }))}
             className="px-3 py-1 border rounded disabled:opacity-50"
           >
             Next

@@ -86,26 +86,3 @@ exports.saveTransaction = async (req, res) => {
   }
 };
 
-exports.getTransactions = async (req, res) => {
-  const { userId } = req.params;
-
-  try {
-    const user = await User.findById(userId).populate('transactions.items.phone');
-    res.status(200).json(user.transactions);
-  } catch (err) {
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-exports.getAllTransactions = async (req, res) => {
-  try {
-    const users = await User.find({})
-      .select('firstname lastname email transactions') // only fetch relevant fields
-      .populate('transactions.items.phone');
-
-    res.status(200).json(users);
-  } catch (err) {
-    console.error('Error fetching all transactions:', err);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-
