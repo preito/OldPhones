@@ -1,4 +1,3 @@
-// src/components/profile/ManageListings.jsx
 import React, { useState, useEffect } from "react";
 import * as phoneApi from "../../api/phoneApi";
 import "./ManageListings.css";
@@ -16,16 +15,16 @@ const BRANDS = [
 ];
 
 export default function ManageListings() {
-  // --- Data + loading/error state ---
+
   const [listings, setListings] = useState([]);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState("");
 
-  // --- Pagination state ---
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9;
 
-  // --- New‐listing modal state ---
+
   const [showAdd, setShowAdd]       = useState(false);
   const [newListing, setNewListing] = useState({
     title: "", brand: "", image: "", price: "", stock: ""
@@ -33,7 +32,6 @@ export default function ManageListings() {
   const [addError, setAddError] = useState("");
   const [adding, setAdding]     = useState(false);
 
-  // Fetch all listings once
   const loadListings = async () => {
     setLoading(true);
     try {
@@ -50,13 +48,13 @@ export default function ManageListings() {
     loadListings();
   }, []);
 
-  // Generic input change
+
   const handleNewChange = (e) => {
     const { name, value } = e.target;
     setNewListing(prev => ({ ...prev, [name]: value }));
   };
 
-  // Brand dropdown change → auto‐set image URL
+ 
   const handleBrandChange = (e) => {
     const brand = e.target.value;
     const image = brand
@@ -65,7 +63,7 @@ export default function ManageListings() {
     setNewListing(prev => ({ ...prev, brand, image }));
   };
 
-  // Add new listing
+
   const handleAdd = async () => {
     setAddError("");
     const { title, brand, image, price, stock } = newListing;
@@ -92,7 +90,7 @@ export default function ManageListings() {
     }
   };
 
-  // Delete listing
+
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this listing?")) return;
     try {
@@ -103,7 +101,7 @@ export default function ManageListings() {
     }
   };
 
-  // Toggle enable/disable
+
   const handleToggle = async (listing) => {
     const newDisabled = !listing.disabled;
     try {
@@ -120,7 +118,7 @@ export default function ManageListings() {
     }
   };
 
-  // Pagination logic
+
   const indexOfLast   = currentPage * itemsPerPage;
   const indexOfFirst  = indexOfLast - itemsPerPage;
   const currentItems  = listings.slice(indexOfFirst, indexOfLast);
@@ -131,7 +129,7 @@ export default function ManageListings() {
 
   return (
     <div className="manage-listings-container">
-      {/* Header */}
+     
       <div className="listings-header">
         <h2>Manage Your Listings</h2>
         <button className="add-listing-button" onClick={() => setShowAdd(true)}>
@@ -139,7 +137,7 @@ export default function ManageListings() {
         </button>
       </div>
 
-      {/* Add‐listing Modal */}
+ 
       {showAdd && (
         <div className="modal-overlay">
           <div className="modal-card">
@@ -214,7 +212,7 @@ export default function ManageListings() {
         </div>
       )}
 
-      {/* Listings Grid */}
+
       {currentItems.length === 0 ? (
         <p>You have no listings yet.</p>
       ) : (
@@ -263,7 +261,7 @@ export default function ManageListings() {
         </div>
       )}
 
-      {/* Pagination Controls */}
+
       {totalPages > 1 && (
         <div className="pagination">
           <button
