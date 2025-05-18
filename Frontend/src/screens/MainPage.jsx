@@ -11,14 +11,15 @@ const MainPage = () => {
   const navigate = useNavigate();
   const { cartItems, addToCart, wishlistItems, addToWishlist, fetchCart, fetchWishlist } = useContext(CartContext);
   const { user, logout, loading } = useAuth();
-
-  const [phones, setPhones] = useState([]);
   const [viewState, setViewState] = useState('home');
   const [previousView, setPreviousView] = useState('home');
   const [soldOutPhones, setSoldOutPhones] = useState([]);
   const [bestSellers, setBestSellers] = useState([]);
   const [selectedPhone, setSelectedPhone] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [searchResults, setSearchResults] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [brandFilter, setBrandFilter] = useState('');
   const [maxPrice, setMaxPrice] = useState(2000);
   const [maxPriceCap, setMaxPriceCap] = useState(2000);
@@ -28,16 +29,14 @@ const MainPage = () => {
   const [quantityInput, setQuantityInput] = useState('');
   const [newComment, setNewComment] = useState('');
   const [newRating, setNewRating] = useState(5);
+  const [filterTrigger, setFilterTrigger] = useState(false);
 
-  const handleSearch = (query) => {
-    const results = phones.filter(p =>
-      p.title.toLowerCase().includes(query.toLowerCase())
-    );
-    setSearchResults(results);
-    setBrandFilter('');
-    setMaxPrice(2000);
+  const handleSearch = async (query) => {
+    setSearchTerm(query);
+    setPage(1);
     setViewState('search');
   };
+
 
   const handleLogout = () => logout();
 
@@ -104,7 +103,6 @@ const MainPage = () => {
       fetch(`/api/phone/getPhoneSeller`)
         .then(res => res.json())
         .then(data => {
-          setPhones(data);
           setMaxPriceCap(Math.ceil(Math.max(...data.map(p => p.price || 0))));
           setTempMaxPrice(Math.ceil(Math.max(...data.map(p => p.price || 0)))); 
           if (viewState === 'home') {
@@ -130,11 +128,33 @@ const MainPage = () => {
     }
   }, [viewState]);
   useEffect(() => {
-  if (user && user._id) {
-    fetchCart(user._id);
-    fetchWishlist(user._id);
-  }
-}, [fetchCart, fetchWishlist, user]);
+    if (user && user._id) {
+      fetchCart(user._id);
+      fetchWishlist(user._id);
+    }
+  }, [fetchCart, fetchWishlist, user]);
+
+  useEffect(() => {
+    if (viewState === 'search') {
+      const fetchPaginatedPhones = async () => {
+        try {
+          const response = await fetch(
+            `/api/admin/phones?page=${page}&limit=9&search=${searchTerm}&brand=${brandFilter}&maxPrice=${maxPrice}`
+          );
+          const data = await response.json();
+          setSearchResults(data.data);         
+          setTotalPages(data.meta.pages);
+        } catch (err) {
+          toast.error("Failed to fetch phones.");
+          console.error(err);
+        }
+      };
+
+      fetchPaginatedPhones();
+    }
+  }, [searchTerm, brandFilter, maxPrice, page, viewState, filterTrigger]);
+
+
 
 
   if (loading) {
@@ -212,6 +232,8 @@ const MainPage = () => {
                 onClick={() => {
                   setBrandFilter(tempBrandFilter);
                   setMaxPrice(tempMaxPrice);
+                  setPage(1); 
+                  setFilterTrigger(prev => !prev);
                 }}
               >
                 Filter
@@ -219,15 +241,30 @@ const MainPage = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {searchResults
-                .filter(phone =>
-                  (brandFilter === '' || phone.brand === brandFilter) &&
-                  phone.price <= maxPrice
-                )
-                .map(phone => (
-                  <PhoneCard key={phone._id} phone={phone} onClick={handlePhoneClick} />
-                ))}
+              {searchResults.map(phone => (
+                <PhoneCard key={phone._id} phone={phone} onClick={handlePhoneClick} />
+              ))}
             </div>
+
+            {searchResults.length > 0 && (
+              <div className="mt-6 flex justify-center gap-4">
+                <button
+                  onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                  disabled={page === 1}
+                  className="bg-gray-300 px-3 py-1 rounded disabled:opacity-50"
+                >
+                  Prev
+                </button>
+                <span className="font-semibold text-lg">Page {page} of {totalPages}</span>
+                <button
+                  onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+                  disabled={page === totalPages}
+                  className="bg-gray-300 px-3 py-1 rounded disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
         )}
 
