@@ -231,31 +231,28 @@ module.exports.reviewerInfo = async (req, res) => {
   }
 };
 
-module.exports.reduceStock = async (req, res) => {
-  const phoneId = req.params.id;
+exports.reduceStock = async (req, res) => {
+  const { id } = req.params;
   const { quantity } = req.body;
-  console.log("Body:", req.body);
-  if (typeof quantity !== "number" || quantity <= 0) {
-    return res.status(400).json({ message: "Invalid quantity" });
-  }
 
   try {
-    const phone = await Phone.findById(phoneId);
-    if (!phone) return res.status(404).send("Phone not found");
+    const phone = await Phone.findById(id);
+    if (!phone) return res.status(404).json({ message: "Phone not found" });
 
     if (phone.stock < quantity) {
-      return res.status(400).json({ message: "Not enough stock" });
+      return res.status(400).json({ message: "Insufficient stock" });
     }
 
     phone.stock -= quantity;
     await phone.save();
 
-    res.json({ success: true });
+    res.status(200).json({ message: "Stock updated" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Error reducing stock" });
+    res.status(500).json({ message: "Server error" });
   }
 };
+
 
 exports.toggleReviewHidden = async (req, res) => {
   try {

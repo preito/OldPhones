@@ -53,7 +53,7 @@ const CheckoutPage = () => {
 
   const handleConfirm = async () => {
     try {
-      // Validate quantityInputs before proceeding
+      // 1. Validate quantities
       for (const item of cartItems) {
         const inputVal = quantityInputs[item.phone._id] ?? item.quantity;
         const quantity = parseInt(inputVal);
@@ -69,44 +69,55 @@ const CheckoutPage = () => {
         }
       }
 
-      // Proceed with stock reduction
-      for (const item of cartItems) {
-        if (!item.phone || !item.phone._id) {
-          console.warn("Skipping cart item due to missing phone info:", item);
-          continue;
-        }
+      // 2. Parallel reduceStock calls
+      await Promise.all(
+        cartItems.map(async (item) => {
+          if (!item.phone || !item.phone._id) {
+            console.warn("Skipping cart item due to missing phone info:", item);
+            return null;
+          }
 
-        const quantity = parseInt(quantityInputs[item.phone._id] ?? item.quantity);
+          const quantity = parseInt(quantityInputs[item.phone._id] ?? item.quantity);
 
-        await fetch(`/api/phone/${item.phone._id}/reduceStock`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            quantity,
-            userId: user._id
-          }),
-        });
-      }
+          const res = await fetch(`/api/phone/${item.phone._id}/reduceStock`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ quantity, userId: user._id }),
+          });
 
+          if (!res.ok) {
+            const errData = await res.json();
+            throw new Error(errData.message || `Failed to update stock for ${item.phone.title}`);
+          }
+
+          return await res.json(); // Optional if you need to use the response
+        })
+      );
+
+      // 3. Calculate total and save transaction
       const total = cartItems.reduce((sum, item) => {
-        if (!item.phone || typeof item.phone.price !== 'number') return sum;
         const quantity = parseInt(quantityInputs[item.phone._id] ?? item.quantity);
         return sum + item.phone.price * quantity;
       }, 0);
 
-      await userApi.saveTransaction(user._id, cartItems.map(item => ({
-        phoneId: item.phone._id,
-        quantity: parseInt(quantityInputs[item.phone._id] ?? item.quantity)
-      })), total);
+      await userApi.saveTransaction(
+        user._id,
+        cartItems.map((item) => ({
+          phoneId: item.phone._id,
+          quantity: parseInt(quantityInputs[item.phone._id] ?? item.quantity),
+        })),
+        total
+      );
 
       toast.success('Transaction confirmed!');
       await clearCart(user._id);
       navigate('/');
     } catch (error) {
       console.error('Checkout failed:', error);
-      toast.error('Something went wrong during checkout.');
+      toast.error(error.message || 'Something went wrong during checkout.');
     }
   };
+
 
 
   const totalPrice = cartItems.reduce((sum, item) => {

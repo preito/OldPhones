@@ -110,19 +110,29 @@ exports.toggleUserDisable = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
-
 exports.getPaginatedPhones = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search = "" } = req.query;
+    const { page = 1, limit = 10, search = "", brand = "", maxPrice = "" } = req.query;
 
-    const query = search
-      ? {
-        $or: [
-          { title: { $regex: search, $options: "i" } },
-          { brand: { $regex: search, $options: "i" } },
-        ],
-      }
-      : {};
+    const query = {};
+
+    // Search (title or brand)
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { brand: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // Brand filter (case-insensitive exact match)
+    if (brand) {
+      query.brand = { $regex: `^${brand}$`, $options: "i" };
+    }
+
+    // Max price filter
+    if (maxPrice && !isNaN(maxPrice)) {
+      query.price = { ...query.price, $lte: Number(maxPrice) };
+    }
 
     const skip = (page - 1) * limit;
 
@@ -131,7 +141,6 @@ exports.getPaginatedPhones = async (req, res) => {
       Phone.countDocuments(query),
     ]);
 
-    // Optionally map to include average rating
     const enrichedPhones = phones.map((phone) => {
       const ratings = phone.reviews || [];
       const avgRating =
@@ -163,6 +172,8 @@ exports.getPaginatedPhones = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
+
 
 exports.updatePhone = async (req, res) => {
   const phoneId = req.params.id;
