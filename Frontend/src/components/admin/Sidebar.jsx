@@ -2,8 +2,8 @@
 export default function Sidebar({ onSelect }) {
   return (
     <div className="w-64 bg-gray-200 p-4">
-      <button onClick={() => onSelect('home')} className="block mb-2 w-full text-left">
-        Admin Home
+      <button onClick={() => onSelect('sales')} className="block mb-2 w-full text-left">
+        Sales Log
       </button>
       <button onClick={() => onSelect('user')} className="block mb-2 w-full text-left">
         User Management

@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Transaction = require('../models/Transaction');
 
 exports.checkUserByCredentials = async (req, res) => {
   try {
@@ -56,6 +57,7 @@ exports.getUserById = async (req, res) => {
   }
 };
 
+
 exports.saveTransaction = async (req, res) => {
   const { userId, items, total } = req.body;
 
@@ -63,16 +65,21 @@ exports.saveTransaction = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    user.transactions.push({
+    const newTransaction = new Transaction({
+      buyer: user._id,
       items: items.map(item => ({
         phone: item.phoneId,
         quantity: item.quantity
       })),
-      total
+      total,
     });
 
-    await user.save();
-    res.status(200).json({ message: 'Transaction saved successfully' });
+    await newTransaction.save();
+
+    res.status(200).json({
+      message: 'Transaction saved successfully',
+      transactionId: newTransaction._id
+    });
   } catch (err) {
     console.error('Transaction save error:', err);
     res.status(500).json({ message: 'Server error' });

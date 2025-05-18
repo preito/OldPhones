@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
+import * as userApi from "../api/userApi";
+
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -92,18 +94,10 @@ const CheckoutPage = () => {
         return sum + item.phone.price * quantity;
       }, 0);
 
-      await fetch('/api/user/save-transaction', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user._id,
-          items: cartItems.map(item => ({
-            phoneId: item.phone._id,
-            quantity: parseInt(quantityInputs[item.phone._id] ?? item.quantity)
-          })),
-          total
-        })
-      });
+      await userApi.saveTransaction(user._id, cartItems.map(item => ({
+        phoneId: item.phone._id,
+        quantity: parseInt(quantityInputs[item.phone._id] ?? item.quantity)
+      })), total);
 
       toast.success('Transaction confirmed!');
       await clearCart(user._id);

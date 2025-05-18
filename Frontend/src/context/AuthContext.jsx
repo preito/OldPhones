@@ -13,15 +13,15 @@ axios.defaults.withCredentials = true
 const AuthContext = createContext({
   user: null,
   loading: true,
-  login: async () => {},
-  logout: async () => {},
-  refreshUser: async () => {},
+  login: async () => { },
+  logout: async () => { },
+  refreshUser: async () => { },
 })
 
 export const useAuth = () => useContext(AuthContext)
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser]       = useState(null)
+  const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
   // refresh the current user
@@ -30,6 +30,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data } = await authApi.me()
       setUser(data)
+      return data
     } catch {
       setUser(null)
     } finally {
@@ -46,8 +47,8 @@ export const AuthProvider = ({ children }) => {
     setLoading(true)
     try {
       await authApi.login(email, password)
-      await refreshUser()
-      return { success: true, user:user }
+      const freshUser = await refreshUser() // get the actual user
+      return { success: true, user: freshUser }
     } catch (err) {
       const message =
         err.response?.data?.message ||
