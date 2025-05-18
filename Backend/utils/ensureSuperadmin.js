@@ -12,6 +12,7 @@ async function ensureSuperAdmin() {
         email: "admin@oldphonedeals.com",
         password: hashed,
         sadmin: true,
+        verified: true,
       });
       await admin.save();
       console.log("Super admin account created.");
