@@ -163,6 +163,10 @@ const MainPage = () => {
                 <option value="Apple">Apple</option>
                 <option value="Samsung">Samsung</option>
                 <option value="Nokia">Nokia</option>
+                <option value="Huawei">Huawei</option>
+                <option value="LG">LG</option>
+                <option value="Motorola">Motorola</option>
+                <option value="HTC">HTC</option>
               </select>
 
               <label className="text-sm ml-4">Max Price: ${tempMaxPrice}</label>
