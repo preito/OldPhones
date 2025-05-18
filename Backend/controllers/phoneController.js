@@ -172,7 +172,6 @@ module.exports.addReview = async (req, res) => {
       return res.status(404).json({ message: "Phone not found" });
     }
 
-    // (Optional) Check if user already reviewed
     const alreadyReviewed = phone.reviews.find(
       (rev) => rev.reviewer.toString() === userId.toString()
     );
@@ -339,3 +338,56 @@ module.exports.getImageByName = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+exports.toggleOwnReviewHidden = async (req, res) => {
+  try {
+    const userId = req.session.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: "Not authenticated." });
+    }
+
+    const { phoneId, reviewId } = req.params;
+    const { hidden } = req.body;
+
+    if (typeof hidden !== "boolean") {
+      return res.status(400).json({ message: "`hidden` must be boolean." });
+    }
+
+    const phone = await Phone.findById(phoneId);
+    if (!phone) {
+      return res.status(404).json({ message: "Phone listing not found." });
+    }
+
+    const review = phone.reviews.id(reviewId);
+    if (!review) {
+      return res.status(404).json({ message: "Review not found." });
+    }
+
+    if (!review.reviewer || review.reviewer.toString() !== userId) {
+      return res.status(403).json({ message: "Forbidden: you can only modify your own review." });
+    }
+
+    review.hidden = hidden;
+    await phone.save();
+
+    // Fetch updated phone with populated reviewers (without .lean(), so we keep document methods)
+    const updated = await Phone.findById(phoneId).populate("reviews.reviewer", "firstname lastname");
+
+    const updatedReview = updated.reviews.find(
+      (r) => r._id?.toString() === reviewId
+    );
+
+    if (!updatedReview) {
+      return res.status(404).json({ message: "Updated review not found after save." });
+    }
+
+    return res.json({
+      message: "Review visibility updated by user",
+      review: updatedReview,
+    });
+  } catch (err) {
+    console.error("toggleOwnReviewHidden error:", err);
+    return res.status(500).json({ message: "Server error." });
+  }
+};
+
+

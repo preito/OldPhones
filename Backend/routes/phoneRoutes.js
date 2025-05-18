@@ -9,7 +9,8 @@ const {
   phoneEnableDisable,
   toggleReviewHidden,
   getImageByName,
-  getImageById
+  getImageById,
+  toggleOwnReviewHidden
 } = require("../controllers/phoneController.js");
 
 // GET /api/phones → Get all phones
@@ -25,5 +26,6 @@ router.put("/api/phones/:id", phoneEnableDisable);
 router.put('/api/phones/:phoneId/reviews/:reviewId', toggleReviewHidden);
 router.get("/api/phone/image/name/:name", getImageByName);
 router.put("/api/phone/image/id/:id", getImageById);
+router.put("/api/phones/:phoneId/reviews/:reviewId/user-toggle", toggleOwnReviewHidden);
 
 module.exports = router;

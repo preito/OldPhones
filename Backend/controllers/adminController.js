@@ -4,22 +4,32 @@ const bcrypt = require("bcrypt");
 
 exports.getPaginatedUsers = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search = "" } = req.query;
+    const {
+      page = 1,
+      limit = 10,
+      search = "",
+      sortField = "firstname",
+      sortOrder = "asc"
+    } = req.query;
 
     const query = search
       ? {
-        $or: [
-          { firstname: { $regex: search, $options: "i" } },
-          { lastname: { $regex: search, $options: "i" } },
-          { email: { $regex: search, $options: "i" } },
-        ],
-      }
+          $or: [
+            { firstname: { $regex: search, $options: "i" } },
+            { lastname: { $regex: search, $options: "i" } },
+            { email: { $regex: search, $options: "i" } },
+          ],
+        }
       : {};
 
     const skip = (page - 1) * limit;
 
+    const sortOptions = {
+      [sortField]: sortOrder === "desc" ? -1 : 1,
+    };
+
     const [users, total] = await Promise.all([
-      User.find(query).skip(skip).limit(Number(limit)),
+      User.find(query).sort(sortOptions).skip(skip).limit(Number(limit)),
       User.countDocuments(query),
     ]);
     res.json({

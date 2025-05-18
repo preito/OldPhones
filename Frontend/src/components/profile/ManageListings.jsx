@@ -1,12 +1,26 @@
+// src/components/profile/ManageListings.jsx
 import React, { useState, useEffect } from "react";
 import * as phoneApi from "../../api/phoneApi";
 import "./ManageListings.css";
+
+const BRANDS = [
+  "Samsung",
+  "Apple",
+  "HTC",
+  "Huawei",
+  "Nokia",
+  "LG",
+  "Motorola",
+  "Sony",
+  "BlackBerry",
+];
 
 export default function ManageListings() {
   const [listings, setListings] = useState([]);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState("");
 
+  // State for the Add‐modal
   const [showAdd, setShowAdd]       = useState(false);
   const [newListing, setNewListing] = useState({
     title: "", brand: "", image: "", price: "", stock: ""
@@ -31,10 +45,19 @@ export default function ManageListings() {
     loadListings();
   }, []);
 
-  // Add‐modal input change
+  // Generic input change
   const handleNewChange = (e) => {
     const { name, value } = e.target;
     setNewListing(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Brand dropdown change → also auto-set the image URL
+  const handleBrandChange = (e) => {
+    const brand = e.target.value;
+    const image = brand 
+      ? `/api/phone/image/name/${encodeURIComponent(brand)}.jpeg`
+      : "";
+    setNewListing(prev => ({ ...prev, brand, image }));
   };
 
   // Submit new listing
@@ -64,7 +87,7 @@ export default function ManageListings() {
     }
   };
 
-  // Delete  listing
+  // Delete a listing
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this listing?")) return;
     try {
@@ -75,11 +98,12 @@ export default function ManageListings() {
     }
   };
 
-  //toggle disabled/enabled
+  // Toggle enable/disable
   const handleToggle = async (listing) => {
     const newDisabled = !listing.disabled;
     try {
-      const { data } = await phoneApi.phoneEnableDisable(listing._id, { disabled: newDisabled });
+     const { data } = await phoneApi.phoneEnableDisable(listing._id, { disabled: newDisabled });
+
       setListings(prev =>
         prev.map(l =>
           l._id === listing._id
@@ -99,15 +123,12 @@ export default function ManageListings() {
     <div className="manage-listings-container">
       <div className="listings-header">
         <h2>Manage Your Listings</h2>
-        <button
-          className="add-listing-button"
-          onClick={() => setShowAdd(true)}
-        >
+        <button className="add-listing-button" onClick={() => setShowAdd(true)}>
           + Add New Listing
         </button>
       </div>
 
-
+      {/* Add‐listing Modal */}
       {showAdd && (
         <div className="modal-overlay">
           <div className="modal-card">
@@ -124,30 +145,26 @@ export default function ManageListings() {
                 disabled={adding}
               />
             </div>
+
             <div className="modal-input-item">
               <label>Brand</label>
-              <input
+              <select
                 name="brand"
-                placeholder="e.g. Samsung"
                 value={newListing.brand}
-                onChange={handleNewChange}
+                onChange={handleBrandChange}
                 disabled={adding}
-              />
+              >
+                <option value="">Select Brand</option>
+                {BRANDS.map((b) => (
+                  <option key={b} value={b}>{b}</option>
+                ))}
+              </select>
             </div>
-            <div className="modal-input-item">
-              <label>Image URL</label>
-              <input
-                name="image"
-                placeholder="e.g. https://…/photo.jpg"
-                value={newListing.image}
-                onChange={handleNewChange}
-                disabled={adding}
-              />
-            </div>
+
             <div className="modal-input-item">
               <label>Price</label>
               <div className="input-with-prefix">
-                <span className="prefix">$</span>
+            
                 <input
                   name="price"
                   type="number"
@@ -159,6 +176,7 @@ export default function ManageListings() {
                 />
               </div>
             </div>
+
             <div className="modal-input-item">
               <label>Stock</label>
               <input
@@ -187,6 +205,7 @@ export default function ManageListings() {
         </div>
       )}
 
+      {/* Existing listings */}
       {listings.length === 0 ? (
         <p>You have no listings yet.</p>
       ) : (
@@ -205,17 +224,18 @@ export default function ManageListings() {
                     {isActive ? "Active" : "Inactive"}
                   </span>
                 </div>
+
                 <div className="listing-image">
                   <img src={listing.image} alt={listing.title} />
                 </div>
+
                 <div className="listing-content">
                   <h3 className="listing-title">{listing.title}</h3>
                   <p className="listing-brand">{listing.brand}</p>
-                  <p className="listing-price">
-                    ${listing.price.toFixed(2)}
-                  </p>
+                  <p className="listing-price">${listing.price.toFixed(2)}</p>
                   <p className="listing-stock">Stock: {listing.stock}</p>
                 </div>
+
                 <div className="listing-actions">
                   <button
                     className="toggle-status-button"

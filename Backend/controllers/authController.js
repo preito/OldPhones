@@ -5,7 +5,14 @@ const sendEmail = require("../utils/sendEmail");
 
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { password } = req.body;
+    let { email } = req.body;
+
+    if (typeof email !== "string") {
+      return res.status(400).json({ message: "Invalid email" });
+    }
+    email = email.trim().toLowerCase();
+
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: "User not found" });
@@ -51,12 +58,15 @@ exports.logout = (req, res) => {
 
 exports.register = async (req, res) => {
   try {
-    const { firstName, lastName, email, password } = req.body;
+    const { firstName, lastName, password } = req.body;
+    let { email } = req.body;
 
     // Basic server-side validation (Potential extention needed)
     if (!firstName || !lastName || !email || !password) {
       return res.status(400).json({ message: "All fields are required." });
     }
+
+    email = String(email).trim().toLowerCase();
 
     // Prevent duplicate accounts
     const exists = await User.findOne({ email });
@@ -72,8 +82,8 @@ exports.register = async (req, res) => {
     const expires = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
     // Create & save the user
     const user = new User({
-      firstname: firstName,
-      lastname: lastName,
+      firstname: firstName.trim(),
+      lastname: lastName.trim(),
       email,
       password: hashed,
       verified: false,

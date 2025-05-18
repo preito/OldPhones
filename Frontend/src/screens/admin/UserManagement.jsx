@@ -11,13 +11,22 @@ export default function UserManagement() {
   const [activeUserDetails, setActiveUserDetails] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [sortField, setSortField] = useState("createdAt");
+  const [sortOrder, setSortOrder] = useState("desc");
+
   const usersPerPage = 10;
 
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        const { data, meta } = await adminApi.fetchUsers(currentPage, usersPerPage, searchTerm);
+        const { data, meta } = await adminApi.fetchUsers(
+          currentPage,
+          usersPerPage,
+          searchTerm,
+          sortField,
+          sortOrder
+        );
         setUsers(data);
         setMeta(meta);
       } catch (error) {
@@ -28,7 +37,16 @@ export default function UserManagement() {
     };
 
     fetchUsers();
-  }, [currentPage, searchTerm]);
+  }, [currentPage, searchTerm, sortField, sortOrder]);
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortOrder("asc");
+    }
+  };
 
   const handleEditChange = (id, field, value) => {
     setEditedUsers((prev) => ({
@@ -45,7 +63,7 @@ export default function UserManagement() {
     if (!edited) return;
 
     try {
-      const response = await adminApi.updateUser(id, {
+      await adminApi.updateUser(id, {
         firstname: edited.firstname,
         lastname: edited.lastname,
         email: edited.email,
@@ -53,7 +71,6 @@ export default function UserManagement() {
 
       toast.success("User updated successfully");
 
-      // Update UI state
       setUsers((prev) =>
         prev.map((user) => (user._id === id ? { ...user, ...edited } : user))
       );
@@ -76,22 +93,12 @@ export default function UserManagement() {
       await adminApi.deleteUser(id);
       toast.success("User deleted successfully");
 
-      // Remove the user from state
       setUsers((prev) => prev.filter((user) => user._id !== id));
     } catch (error) {
       console.error("Delete error:", error);
       toast.error("Failed to delete user");
     }
   };
-
-  const filteredUsers = users.filter((user) => {
-    const term = searchTerm.toLowerCase();
-    return (
-      user.firstname.toLowerCase().includes(term) ||
-      user.lastname.toLowerCase().includes(term) ||
-      user.email.toLowerCase().includes(term)
-    );
-  });
 
   const handleToggleDisable = async (userId) => {
     const confirm = window.confirm("Are you sure you want to toggle the user's active status?");
@@ -101,14 +108,23 @@ export default function UserManagement() {
       const result = await adminApi.toggleUserDisable(userId);
       toast.success(result.message);
 
-      // Refresh users after toggling
-      const updated = await adminApi.fetchUsers(currentPage, usersPerPage, searchTerm);
+      const updated = await adminApi.fetchUsers(
+        currentPage,
+        usersPerPage,
+        searchTerm,
+        sortField,
+        sortOrder
+      );
       setUsers(updated.data);
       setMeta(updated.meta);
     } catch (error) {
       console.error("Error toggling user status:", error);
       toast.error("Failed to change user status");
     }
+  };
+
+  const getSortArrow = (field) => {
+    return sortField === field ? (sortOrder === "asc" ? " ▲" : " ▼") : "";
   };
 
   return (
@@ -133,15 +149,30 @@ export default function UserManagement() {
           <table className="w-full min-w-[700px] table-auto border border-gray-300">
             <thead className="bg-gray-100">
               <tr>
-                <th className="px-4 py-2 text-center">Full Name</th>
-                <th className="px-4 py-2 text-center">Email</th>
-                <th className="px-4 py-2 text-center">Created At</th>
+                <th
+                  className="px-4 py-2 text-center cursor-pointer"
+                  onClick={() => handleSort("firstname")}
+                >
+                  Full Name{getSortArrow("firstname")}
+                </th>
+                <th
+                  className="px-4 py-2 text-center cursor-pointer"
+                  onClick={() => handleSort("email")}
+                >
+                  Email{getSortArrow("email")}
+                </th>
+                <th
+                  className="px-4 py-2 text-center cursor-pointer"
+                  onClick={() => handleSort("createdAt")}
+                >
+                  Created At{getSortArrow("createdAt")}
+                </th>
                 <th className="px-4 py-2 text-center">Actions</th>
                 <th className="px-4 py-2 text-center">Details</th>
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map((user) => {
+              {users.map((user) => {
                 const edited = editedUsers[user._id] || {};
                 const createdDate = new Date(user.createdAt).toLocaleDateString();
                 return (
@@ -188,15 +219,18 @@ export default function UserManagement() {
                         </button>
                         <button
                           onClick={() => handleToggleDisable(user._id)}
-                          className={`px-3 py-1 rounded font-medium transition ${user.disabled
-                            ? "bg-green-500 text-white hover:bg-green-600"  // For "Enable"
-                            : "bg-yellow-500 text-white hover:bg-yellow-600" // For "Disable"
-                            }`}
+                          className={`px-3 py-1 rounded font-medium transition ${
+                            user.disabled
+                              ? "bg-green-500 text-white hover:bg-green-600"
+                              : "bg-yellow-500 text-white hover:bg-yellow-600"
+                          }`}
                         >
                           {user.disabled ? "Enable" : "Disable"}
                         </button>
-                        <button className="text-red-600 hover:underline"
-                          onClick={() => handleDelete(user._id)}>
+                        <button
+                          className="text-red-600 hover:underline"
+                          onClick={() => handleDelete(user._id)}
+                        >
                           Delete
                         </button>
                       </div>
@@ -238,18 +272,14 @@ export default function UserManagement() {
         </button>
       </div>
 
-      {/* Modal remains unchanged */}
+      {/* Modal */}
       {activeUserDetails && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-[90%] max-w-2xl relative">
             <h2 className="text-xl font-bold mb-4">
-              Listings & Reviews for {activeUserDetails.firstname}{" "}
-              {activeUserDetails.lastname}
+              Listings & Reviews for {activeUserDetails.firstname} {activeUserDetails.lastname}
             </h2>
-
-            {/* You should ideally fetch listings & reviews for the user from API */}
             <p>Listings and Reviews placeholder here.</p>
-
             <button
               className="absolute top-2 right-2 text-gray-600 hover:text-black"
               onClick={() => setActiveUserDetails(null)}

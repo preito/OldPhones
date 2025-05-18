@@ -137,7 +137,20 @@ export const CartProvider = ({ children }) => {
       }
     }
   };
-
+  const fetchWishlist = async (userId) => {
+    try {
+      const res = await fetch(`/api/wishlist/${userId}`);
+      const data = await res.json();
+      if (res.ok) {
+        setWishlistItems(data);
+      } else {
+        console.error('Failed to fetch wishlist:', data.message);
+      }
+    } catch (error) {
+      console.error('Error fetching wishlist:', error);
+    }
+  };
+  
   const clearWishlist = async (userId) => {
     for (const item of wishlistItems) {
       if (item && item._id) {
@@ -159,7 +172,8 @@ export const CartProvider = ({ children }) => {
       removeFromWishlist,
       setWishlistItems,
       clearWishlist,
-      fetchCart
+      fetchCart,
+      fetchWishlist
     }}>
       {children}
     </CartContext.Provider>
