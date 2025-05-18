@@ -53,7 +53,7 @@ function App() {
               {/* Admin routes (will add separate protection later) */}
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<SalesLog />} />
-                <Route path="home" element={<SalesLog />} />
+                <Route path="sales" element={<SalesLog />} />
                 <Route path="users" element={<UserManagement />} />
                 <Route path="listings" element={<ListingManagement />} />
                 <Route path="content" element={<ContentModeration />} />
