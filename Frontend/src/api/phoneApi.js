@@ -10,3 +10,6 @@ export const phoneEnableDisable = (id, payload) =>
 
 export const toggleReviewHidden = (phoneId, reviewId, hidden) =>
   axios.put(`/phones/${phoneId}/reviews/${reviewId}`, { hidden });
+
+export const toggleOwnReviewHidden = (phoneId, reviewId, hidden) =>
+  axios.put(`/phones/${phoneId}/reviews/${reviewId}/user-toggle`, { hidden });
