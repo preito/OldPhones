@@ -4,6 +4,7 @@ import PhoneCard from '../components/profile/PhoneCard';
 import { useNavigate } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import * as phoneApi from "../api/phoneApi";
 import { toast } from 'react-toastify';
 
 const MainPage = () => {
@@ -24,7 +25,6 @@ const MainPage = () => {
   const [tempBrandFilter, setTempBrandFilter] = useState('');
   const [tempMaxPrice, setTempMaxPrice] = useState(2000);
   const [visibleReviewCount, setVisibleReviewCount] = useState(3);
-  const [hiddenReviewIds, setHiddenReviewIds] = useState([]);
   const [quantityInput, setQuantityInput] = useState('');
   const [newComment, setNewComment] = useState('');
   const [newRating, setNewRating] = useState(5);
@@ -47,7 +47,6 @@ const MainPage = () => {
     setViewState('item');
     setQuantityInput('');
     setVisibleReviewCount(3);
-    setHiddenReviewIds([]);
     setNewComment('');
     setNewRating(5);
   };
@@ -81,6 +80,23 @@ const MainPage = () => {
     await fetchCart(user._id);
     toast.success("Item added to cart!");
     setQuantityInput('');
+  };
+
+  const handleToggleReview = async (phoneId, review) => {
+    try {
+      const res = await phoneApi.toggleOwnReviewHidden(phoneId, review._id, !review.hidden);
+      const updatedReview = res.data.review;
+
+      setSelectedPhone((prev) => ({
+        ...prev,
+        reviews: prev.reviews.map((r) =>
+          r._id === review._id ? updatedReview : r
+        ),
+      }));
+    } catch (err) {
+      console.error("Could not toggle review:", err);
+      toast.error("Failed to update review visibility.");
+    }
   };
 
   useEffect(() => {
@@ -118,7 +134,7 @@ const MainPage = () => {
     fetchCart(user._id);
     fetchWishlist(user._id);
   }
-}, [user]);
+}, [fetchCart, fetchWishlist, user]);
 
 
   if (loading) {
@@ -240,27 +256,25 @@ const MainPage = () => {
             {selectedPhone.reviews
               .slice(0, visibleReviewCount)
               .map((review, idx) => {
-                const isHidden = hiddenReviewIds.includes(idx);
                 const isLong = review.comment.length > 200;
                 const canHide = user?._id === review.reviewer?._id || user?._id === selectedPhone.seller?._id;
 
                 return (
-                  <div key={idx} className={`bg-zinc-300 p-4 rounded my-2 ${isHidden ? 'opacity-50' : ''}`}>
+                  <div key={idx} className={`bg-zinc-300 p-4 rounded my-2 ${review.hidden ? 'opacity-50' : ''}`}>
                     <p className="font-semibold">{review.reviewer?.firstname} {review.reviewer?.lastname || 'Unknown Reviewer'}</p>
                     <p>Rating: {review.rating}</p>
                     <p>
                       {isLong ? `${review.comment.slice(0, 200)}...` : review.comment}
-                      {isLong && !isHidden && (
+                      {isLong && !review.hidden && (
                         <button onClick={() => toast.info(review.comment)} className="text-blue-700 ml-2 underline">Show full</button>
                       )}
                     </p>
                     {canHide && (
-                      <button onClick={() => {
-                        setHiddenReviewIds(prev =>
-                          prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]
-                        );
-                      }} className="text-red-800 mt-2 block underline">
-                        {isHidden ? 'Show' : 'Hide'}
+                      <button
+                        onClick={() => handleToggleReview(selectedPhone._id, review)}
+                        className="text-red-800 mt-2 block underline"
+                      >
+                        {review.hidden ? 'Show' : 'Hide'}
                       </button>
                     )}
                   </div>
