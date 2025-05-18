@@ -52,7 +52,7 @@ const MainPage = () => {
 
   const handleAddToCart = async () => {
     if (!user) {
-      toast.info("Please sign in to add items to your cart.");
+      navigate("/signin");
       return;
     }
 

@@ -7,7 +7,7 @@ export default function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const links = [
-    { path: "home", label: "Home" },
+    { path: "sales", label: "Sales Log" },
     { path: "users", label: "User Management" },
     { path: "listings", label: "Listing Management" },
     { path: "content", label: "Content Moderation" },
