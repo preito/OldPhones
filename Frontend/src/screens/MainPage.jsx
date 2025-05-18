@@ -22,7 +22,7 @@ const MainPage = () => {
   const [maxPrice, setMaxPrice] = useState(2000);
   const [tempBrandFilter, setTempBrandFilter] = useState('');
   const [tempMaxPrice, setTempMaxPrice] = useState(2000);
-  const [showAllReviews, setShowAllReviews] = useState(false);
+  const [visibleReviewCount, setVisibleReviewCount] = useState(3);
   const [hiddenReviewIds, setHiddenReviewIds] = useState([]);
   const [quantityInput, setQuantityInput] = useState('');
   const [newComment, setNewComment] = useState('');
@@ -45,7 +45,7 @@ const MainPage = () => {
     setPreviousView(viewState);
     setViewState('item');
     setQuantityInput('');
-    setShowAllReviews(false);
+    setVisibleReviewCount(3);
     setHiddenReviewIds([]);
     setNewComment('');
     setNewRating(5);
@@ -225,7 +225,7 @@ const MainPage = () => {
 
             <h3 className="mt-6 text-xl font-semibold">Reviews</h3>
             {selectedPhone.reviews
-              .slice(0, showAllReviews ? selectedPhone.reviews.length : 3)
+              .slice(0, visibleReviewCount)
               .map((review, idx) => {
                 const isHidden = hiddenReviewIds.includes(idx);
                 const isLong = review.comment.length > 200;
@@ -255,9 +255,29 @@ const MainPage = () => {
               })}
 
             {selectedPhone.reviews.length > 3 && (
-              <button onClick={() => setShowAllReviews(prev => !prev)} className="text-blue-700 underline">
-                {showAllReviews ? 'Show Less' : 'Show More Reviews'}
-              </button>
+              <div className="mt-2 space-x-4">
+                {visibleReviewCount < selectedPhone.reviews.length ? (
+                  <button
+                    onClick={() => setVisibleReviewCount(prev => prev + 3)}
+                    className="text-blue-700 underline"
+                  >
+                    Show More Reviews
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setVisibleReviewCount(3);
+                      setTimeout(() => {
+                        const el = document.getElementById('reviews-section');
+                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      }, 100);
+                    }}
+                    className="text-blue-700 underline"
+                  >
+                    Show Less Reviews
+                  </button>
+                )}
+              </div>
             )}
 
             <div className="mt-6 space-y-4">
