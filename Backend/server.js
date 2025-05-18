@@ -17,6 +17,7 @@ const phoneRoutes = require("./routes/phoneRoutes");
 const MongoStore = require("connect-mongo");
 const setUpImages = require("./utils/setUpImages");
 const ensureSuperAdmin = require("./utils/ensureSuperadmin");
+const updateUsers = require("./utils/updateUsers");
 const PORT = process.env.PORT || 5000;
 const app = express();
 connectDB();
@@ -45,6 +46,8 @@ app.use('/', phoneRoutes)
 app.use("/", routes);
 app.use("/", adminRoutes);  // separate admin route
 
+
+updateUsers();
 // Initialize core admin and image setup
 ensureSuperAdmin();
 setUpImages.uploadImages();
