@@ -1,5 +1,4 @@
 var express = require('express');
-var controller = require('../controllers/controller');
 const phoneController= require('../controllers/phoneController');
 const userController = require('../controllers/userController');
 const cartController = require('../controllers/cartController');

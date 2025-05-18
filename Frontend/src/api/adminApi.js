@@ -22,4 +22,20 @@ export const toggleUserDisable = async (userId) => {
   const response = await axios.patch(`/admin/users/${userId}/toggle-disable`);
   return response.data;
 };
+export const fetchModeratedReviews = async ({ searchTitle, searchReviewer, searchComment, page = 1, limit = 10 }) => {
+  const res = await axios.get('/admin/reviews', {
+  params: {
+    searchTitle: searchTitle,
+    searchReviewer: searchReviewer,
+    searchComment: searchComment,
+    page,
+    limit,
+  },
+});
+  return res.data;
+};
+export const toggleReviewHidden = async (phoneId, reviewerId) => {
+  const res = await axios.patch(`/admin/phones/${phoneId}/reviews/${reviewerId}/toggle-hidden`);
+  return res.data;
+};
 

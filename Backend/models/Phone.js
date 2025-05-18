@@ -4,7 +4,7 @@ const reviewSchema = new mongoose.Schema({
   reviewer: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   rating: Number,
   comment: String,
-  hidden: { type: Boolean, default: false },
+  hidden: Boolean,
 });
 
 const phoneSchema = new mongoose.Schema({

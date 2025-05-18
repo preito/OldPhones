@@ -10,6 +10,7 @@ export default function AdminLayout() {
     { path: "home", label: "Home" },
     { path: "users", label: "User Management" },
     { path: "listings", label: "Listing Management" },
+    { path: "content", label: "Content Moderation" },
   ];
 
   const handleNav = (path) => {

@@ -11,6 +11,9 @@ export default function Sidebar({ onSelect }) {
       <button onClick={() => onSelect('listing')} className="block w-full text-left">
         Listing Management
       </button>
+      <button onClick={() => onSelect('content')} className="block w-full text-left">
+        Content Moderation
+      </button>
     </div>
   );
 }

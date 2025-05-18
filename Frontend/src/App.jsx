@@ -14,6 +14,7 @@ import ResetPassword from "./screens/auth/ResetPassword";
 import ProtectedRoute from './components/protectedRoutes/ProtectedProfileRoute';import AdminLayout from "./components/admin/AdminLayout";
 import UserManagement from './screens/admin/UserManagement';
 import ListingManagement from './screens/admin/ListingManagement';
+import ContentModeration from './screens/admin/ContentModeration';
 import AdminHome from './screens/admin/AdminHome';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -44,6 +45,7 @@ function App() {
               <Route path="/admin" element={<AdminLayout />}>
                 <Route path="users" element={<UserManagement />} />
                 <Route path="listings" element={<ListingManagement />} />
+                <Route path="content" element={<ContentModeration />} />
                 <Route path="home" element={<AdminHome />} />
                 <Route index element={<AdminHome />} />
               </Route>
