@@ -4,7 +4,13 @@ const userSchema = new mongoose.Schema(
   {
     firstname: { type: String, required: true },
     lastname: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
     password: { type: String, required: true }, // hashed password
     wishlist: [
       {
@@ -24,11 +30,11 @@ const userSchema = new mongoose.Schema(
           {
             phone: { type: mongoose.Schema.Types.ObjectId, ref: "Phone" },
             quantity: Number,
-          }
+          },
         ],
         total: Number,
-        date: { type: Date, default: Date.now }
-      }
+        date: { type: Date, default: Date.now },
+      },
     ],
     verified: { type: Boolean, default: false },
     verificationToken: { type: String },
