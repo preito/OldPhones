@@ -170,7 +170,6 @@ export default function UserManagement() {
                   Created At{getSortArrow("createdAt")}
                 </th>
                 <th className="px-4 py-2 text-center">Actions</th>
-                <th className="px-4 py-2 text-center">Details</th>
               </tr>
             </thead>
             <tbody>
@@ -236,14 +235,6 @@ export default function UserManagement() {
                           Delete
                         </button>
                       </div>
-                    </td>
-                    <td className="px-4 py-2">
-                      <button
-                        onClick={() => setActiveUserDetails(user)}
-                        className="text-indigo-600 hover:underline"
-                      >
-                        View
-                      </button>
                     </td>
                   </tr>
                 );
