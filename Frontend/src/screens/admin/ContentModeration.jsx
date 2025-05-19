@@ -46,22 +46,10 @@ const ContentModeration = () => {
     }
   };
 
-  const handleDeletePhone = async (phoneId) => {
-    const confirm = window.confirm('Are you sure you want to permanently delete this phone and all associated reviews?');
-    if (!confirm) return;
-
-    try {
-      const res = await deletePhone(phoneId);
-      toast.success(res.message || 'Phone deleted successfully');
-      setFilters({ ...filters }); // reload updated list
-    } catch (err) {
-      console.error('Delete error:', err);
-      toast.error('Failed to delete phone');
-    }
-  };
-
   return (
     <div className="p-6 space-y-4">
+      <br></br>
+      <br></br>
       <h2 className="text-2xl font-semibold text-center">Review Moderation</h2>
 
       <div className="w-full flex flex-col sm:flex-row gap-2">
@@ -111,12 +99,6 @@ const ContentModeration = () => {
                         }`}
                     >
                       {r.hidden ? 'Unhide' : 'Hide'}
-                    </button>
-                    <button
-                      onClick={() => handleDeletePhone(r.phoneId)}
-                      className="text-white bg-red-600 hover:bg-red-700 px-2 py-1 rounded"
-                    >
-                      Delete
                     </button>
                   </td>
                 </tr>

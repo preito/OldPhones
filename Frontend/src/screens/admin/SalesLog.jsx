@@ -30,6 +30,8 @@ const SalesLog = () => {
 
   return (
     <div className="p-6 space-y-4">
+      <br></br>
+      <br></br>
       <h2 className="text-2xl font-semibold text-center">Sales Log</h2>
 
       <div className="overflow-x-auto">

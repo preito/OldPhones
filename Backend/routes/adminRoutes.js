@@ -27,4 +27,6 @@ router.patch('/api/admin/phones/:phoneId/reviews/:reviewerId/toggle-hidden', adm
 
 router.get('/api/admin/transactions', adminController.getPaginatedTransactions);
 
+router.get('/api/admin/has-unread-transactions', adminController.hasUnreadTransactions);
+
 module.exports = router;

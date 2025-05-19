@@ -173,8 +173,6 @@ exports.getPaginatedPhones = async (req, res) => {
   }
 };
 
-
-
 exports.updatePhone = async (req, res) => {
   const phoneId = req.params.id;
   const { brand, title, stock, price } = req.body;
@@ -383,6 +381,20 @@ exports.getPaginatedTransactions = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+exports.hasUnreadTransactions = async (req, res) => {
+  try {
+    const exists = await Transaction.exists({ read: false });
+
+    res.status(200).json({
+      hasUnread: Boolean(exists),
+    });
+  } catch (err) {
+    console.error('Failed to check unread transactions:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 
 
 

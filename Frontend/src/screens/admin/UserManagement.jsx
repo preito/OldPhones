@@ -129,6 +129,8 @@ export default function UserManagement() {
 
   return (
     <div className="p-3">
+      <br></br>
+      <br></br>
       <h1 className="text-2xl font-bold mb-6 text-center">User Management</h1>
 
       <input

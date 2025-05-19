@@ -65,6 +65,11 @@ export const deletePhone = async (id) => {
   return res.data;
 };
 
+export const checkUnread = async () => {
+  const res = await axios.get(`/admin/has-unread-transactions`);
+  return res.data;
+};
+
 export const fetchSalesLogs = async ({ page = 1, limit = 10 }) => {
   const response = await axios.get('/admin/transactions', {
     params: { page, limit },

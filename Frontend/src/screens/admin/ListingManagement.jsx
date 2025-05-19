@@ -133,6 +133,8 @@ export default function ListingManagement() {
 
   return (
     <div className="p-4">
+      <br></br>
+      <br></br>
       <h1 className="text-2xl font-bold text-center mb-4">Listing Management</h1>
 
       <input
