@@ -1,261 +1,290 @@
 import React, { useEffect, useState } from "react";
-import { toast } from "react-toastify";
-// Removed import of fetchPhones from adminApi
-import * as adminApi from "../../api/adminApi";
+import {
+  fetchPhones,
+  updatePhone,
+  deletePhone,
+  togglePhoneDisable,
+} from "../../api/adminApi";
+import { ToastContainer, toast } from "react-toastify";
 
-export default function ListingManagement() {
-  const [listings, setListings] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [editedListings, setEditedListings] = useState({});
+const ListingManagement = () => {
+  const [phones, setPhones] = useState([]);
+  const [search, setSearch] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
   const [page, setPage] = useState(1);
-  const [sortField, setSortField] = useState("createdAt");
-  const [sortOrder, setSortOrder] = useState("desc");
-  const [totalPages, setTotalPages] = useState(1);
+  const [limit] = useState(10);
+  const [meta, setMeta] = useState({});
+  const [editPhoneId, setEditPhoneId] = useState(null);
+  const [editFields, setEditFields] = useState({});
+  const [expandedPhoneId, setExpandedPhoneId] = useState(null);
+
+  const loadPhones = async () => {
+    try {
+      const res = await fetchPhones(page, limit, search, "", maxPrice, "", "");
+      setPhones(res.data);
+      setMeta(res.meta);
+    } catch (err) {
+      console.error("Failed to load phones:", err);
+      toast.error("Failed to load phone listings.");
+    }
+  };
 
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      fetchListings();
-    }, 500);
-    return () => clearTimeout(delayDebounce);
-  }, [searchTerm, page, sortField, sortOrder]);
+    loadPhones();
+  }, [page, search, maxPrice]);
 
-  const fetchListings = async () => {
-    setLoading(true);
+  const handleToggleDisable = async (id) => {
     try {
-      const response = await fetch("/phonelisting.json"); // Adjust path if needed
-      const data = await response.json();
-
-      let phones = Array.isArray(data) ? data : [];
-
-      // Filter
-      if (searchTerm.trim() !== "") {
-        const term = searchTerm.toLowerCase();
-        phones = phones.filter(
-          (phone) =>
-            phone.title.toLowerCase().includes(term) ||
-            phone.brand.toLowerCase().includes(term)
-        );
-      }
-
-      // Sort
-      if (sortField && sortField !== "createdAt") {
-        phones.sort((a, b) => {
-          const aValue = a[sortField];
-          const bValue = b[sortField];
-
-          if (typeof aValue === "string") {
-            return sortOrder === "asc"
-              ? aValue.localeCompare(bValue)
-              : bValue.localeCompare(aValue);
-          }
-          return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
-        });
-      }
-
-      const total = phones.length;
-      const itemsPerPage = 10;
-      const pagedPhones = phones.slice(
-        (page - 1) * itemsPerPage,
-        page * itemsPerPage
+      await togglePhoneDisable(id);
+      setPhones((prev) =>
+        prev.map((phone) =>
+          phone._id === id ? { ...phone, disabled: !phone.disabled } : phone
+        )
       );
-
-      setListings(pagedPhones);
-      setTotalPages(Math.ceil(total / itemsPerPage));
+      toast.success("Phone status updated.");
     } catch (err) {
-      console.error("Error fetching listings from JSON", err);
-      setListings([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleEditChange = (id, field, value) => {
-    setEditedListings((prev) => ({
-      ...prev,
-      [id]: { ...prev[id], [field]: value },
-    }));
-  };
-
-  const handleSave = async (id) => {
-    const confirm = window.confirm("Save changes to this listing?");
-    if (!confirm) return;
-
-    try {
-      const changes = editedListings[id];
-      await adminApi.updatePhone(id, changes);
-      toast.success("Listing updated!");
-      await fetchListings();
-      setEditedListings((prev) => {
-        const updated = { ...prev };
-        delete updated[id];
-        return updated;
-      });
-    } catch {
-      toast.error("Failed to update listing.");
-    }
-  };
-
-  const handleDisable = async (id) => {
-    const confirm = window.confirm("Toggle active status?");
-    if (!confirm) return;
-
-    try {
-      await adminApi.togglePhoneDisable(id);
-      toast.success("Listing status updated");
-      await fetchListings();
-    } catch {
-      toast.error("Failed to update status");
+      console.error("Error toggling phone:", err);
+      toast.error("Failed to toggle phone status.");
     }
   };
 
   const handleDelete = async (id) => {
-    const confirm = window.confirm("Delete this listing?");
-    if (!confirm) return;
-
+    if (!window.confirm("Are you sure you want to delete this phone?")) return;
     try {
-      await adminApi.deletePhone(id);
-      toast.success("Listing deleted");
-      await fetchListings();
-    } catch {
-      toast.error("Failed to delete listing");
+      await deletePhone(id);
+      setPhones((prev) => prev.filter((phone) => phone._id !== id));
+      toast.success("Phone deleted successfully.");
+    } catch (err) {
+      console.error("Delete failed:", err);
+      toast.error("Failed to delete phone.");
     }
   };
 
-  const handleSortChange = (field) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortOrder("asc");
+  const handleEditChange = (id, field, value) => {
+    setEditFields((prev) => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleEditSave = async (id) => {
+    try {
+      await updatePhone(id, editFields[id]);
+      setEditPhoneId(null);
+      setEditFields((prev) => {
+        const { [id]: removed, ...rest } = prev;
+        return rest;
+      });
+      loadPhones();
+      toast.success("Phone updated successfully.");
+    } catch (err) {
+      console.error("Edit failed:", err);
+      toast.error("Failed to save changes.");
     }
+  };
+
+  const toggleExpand = (id) => {
+    setExpandedPhoneId((prev) => (prev === id ? null : id));
   };
 
   return (
-    <div className="p-4">
+    <div className="p-6">
+      <ToastContainer />
       <br></br>
       <br></br>
-      <h1 className="text-2xl font-bold text-center mb-4">Listing Management</h1>
+      <h2 className="text-2xl font-bold mb-4">Phone Listings Management</h2>
 
-      <input
-        type="text"
-        placeholder="Search by title or brand"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="mb-4 w-full max-w-md px-4 py-2 border rounded block mx-auto"
-      />
-
-      <div className="flex justify-center gap-4 mb-4">
-        <button onClick={() => handleSortChange("price")} className="px-3 py-1 border rounded">
-          Sort by Price ({sortField === "price" ? sortOrder : ""})
-        </button>
-        <button onClick={() => handleSortChange("brand")} className="px-3 py-1 border rounded">
-          Sort by Brand ({sortField === "brand" ? sortOrder : ""})
-        </button>
+      <div className="flex flex-wrap gap-2 mb-4">
+        <input
+          type="text"
+          placeholder="Search title or brand"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="border p-2 rounded"
+        />
+        <input
+          type="number"
+          placeholder="Max price"
+          value={maxPrice}
+          onChange={(e) => setMaxPrice(e.target.value)}
+          className="border p-2 rounded"
+        />
       </div>
 
-      {loading ? (
-        <p className="text-center">Loading listings...</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[800px] border border-gray-300">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="px-4 py-2">Title</th>
-                <th className="px-4 py-2">Brand</th>
-                <th className="px-4 py-2">Price</th>
-                <th className="px-4 py-2">Stock</th>
-                <th className="px-4 py-2">Status</th>
-                <th className="px-4 py-2">Actions</th>
+      <table className="w-full border">
+        <thead>
+          <tr className="bg-gray-100 text-left">
+            <th className="p-2">Image</th>
+            <th className="p-2">Title</th>
+            <th className="p-2">Brand</th>
+            <th className="p-2">Price</th>
+            <th className="p-2">Stock</th>
+            <th className="p-2">Avg. Rating</th>
+            <th className="p-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {phones.map((phone) => (
+            <React.Fragment key={phone._id}>
+              <tr className="border-t hover:bg-gray-50">
+                <td className="p-2">
+                  <img
+                    src={`/api/phone/image/name/${encodeURIComponent(phone.brand)}.jpeg`}
+                    alt={phone.title}
+                    className="h-16"
+                  />
+                </td>
+                <td className="p-2">
+                  {editPhoneId === phone._id ? (
+                    <input
+                      value={editFields[phone._id]?.title || phone.title}
+                      onChange={(e) =>
+                        handleEditChange(phone._id, "title", e.target.value)
+                      }
+                      className="border rounded p-1 w-full"
+                    />
+                  ) : (
+                    phone.title
+                  )}
+                </td>
+                <td className="p-2">{phone.brand}</td>
+                <td className="p-2">
+                  {editPhoneId === phone._id ? (
+                    <input
+                      type="number"
+                      value={editFields[phone._id]?.price || phone.price}
+                      onChange={(e) =>
+                        handleEditChange(phone._id, "price", e.target.value)
+                      }
+                      className="border rounded p-1 w-full"
+                    />
+                  ) : (
+                    `$${phone.price}`
+                  )}
+                </td>
+                <td className="p-2">
+                  {editPhoneId === phone._id ? (
+                    <input
+                      type="number"
+                      value={editFields[phone._id]?.stock || phone.stock}
+                      onChange={(e) =>
+                        handleEditChange(phone._id, "stock", e.target.value)
+                      }
+                      className="border rounded p-1 w-full"
+                    />
+                  ) : (
+                    phone.stock
+                  )}
+                </td>
+                <td className="p-2">
+                  {phone.avgRating ? phone.avgRating.toFixed(1) : "N/A"}
+                </td>
+                <td className="p-2 flex flex-wrap gap-1">
+                  {editPhoneId === phone._id ? (
+                    <button
+                      onClick={() => handleEditSave(phone._id)}
+                      className="px-2 py-1 rounded bg-blue-600 text-white"
+                    >
+                      Save
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setEditPhoneId(phone._id);
+                        setEditFields((prev) => ({
+                          ...prev,
+                          [phone._id]: {
+                            title: phone.title,
+                            price: phone.price,
+                            stock: phone.stock,
+                          },
+                        }));
+                      }}
+                      className="px-2 py-1 rounded bg-gray-700 text-white"
+                    >
+                      Edit
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleToggleDisable(phone._id)}
+                    className={`px-2 py-1 rounded text-white ${
+                      phone.disabled ? "bg-green-600" : "bg-yellow-600"
+                    }`}
+                  >
+                    {phone.disabled ? "Enable" : "Disable"}
+                  </button>
+                  <button
+                    onClick={() => handleDelete(phone._id)}
+                    className="px-2 py-1 rounded bg-red-600 text-white"
+                  >
+                    Delete
+                  </button>
+                  <button
+                    onClick={() => toggleExpand(phone._id)}
+                    className="px-2 py-1 rounded bg-indigo-600 text-white"
+                  >
+                    {expandedPhoneId === phone._id ? "Hide" : "Details"}
+                  </button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {Array.isArray(listings) && listings.map((listing, index) => {
-                const id = listing._id || `json-${index}`;
-                const edited = editedListings[id] || {};
-                return (
-                  <tr key={id} className="border-t text-center">
-                    <td className="px-4 py-2">
-                      <input
-                        type="text"
-                        value={edited.title ?? listing.title}
-                        onChange={(e) =>
-                          handleEditChange(id, "title", e.target.value)
-                        }
-                        className="border px-2 py-1 rounded w-full"
-                      />
-                    </td>
-                    <td className="px-4 py-2">{listing.brand}</td>
-                    <td className="px-4 py-2">
-                      <input
-                        type="number"
-                        value={edited.price ?? listing.price}
-                        onChange={(e) =>
-                          handleEditChange(id, "price", e.target.value)
-                        }
-                        min={0}
-                        className="border px-2 py-1 rounded w-full"
-                      />
-                    </td>
-                    <td className="px-4 py-2">
-                      <input
-                        type="number"
-                        value={edited.stock ?? listing.stock}
-                        onChange={(e) =>
-                          handleEditChange(id, "stock", e.target.value)
-                        }
-                        min={0}
-                        className="border px-2 py-1 rounded w-full"
-                      />
-                    </td>
-                    <td className="px-4 py-2">
-                      {listing.disabled ? "Disabled" : "Active"}
-                    </td>
-                    <td className="px-4 py-2 space-y-1">
-                      <button
-                        onClick={() => handleSave(id)}
-                        className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 block w-full"
-                      >
-                        Save
-                      </button>
-                      <button
-                        onClick={() => handleDisable(id)}
-                        className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 block w-full"
-                      >
-                        {listing.disabled ? "Enable" : "Disable"}
-                      </button>
-                      <button
-                        onClick={() => handleDelete(id)}
-                        className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 block w-full"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
 
-      <div className="flex justify-center gap-2 mt-4">
+              {expandedPhoneId === phone._id && (
+                <tr>
+                  <td colSpan="7" className="bg-gray-50 p-4">
+                    <div>
+                      <p>
+                        <strong>Seller:</strong> {phone.seller?.name || "N/A"} (
+                        {phone.seller?.email || "N/A"})
+                      </p>
+                      <p>
+                        <strong>Reviews:</strong>
+                      </p>
+                      <ul className="list-disc list-inside ml-4">
+                        {phone.reviews && phone.reviews.length > 0 ? (
+                          phone.reviews.map((review, idx) => (
+                            <li key={idx}>
+                              <strong>{review.user}</strong>: {review.comment} (
+                              {review.rating}★)
+                            </li>
+                          ))
+                        ) : (
+                          <li>No reviews</li>
+                        )}
+                      </ul>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </React.Fragment>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Pagination */}
+      <div className="flex justify-between items-center mt-4">
         <button
-          onClick={() => setPage((p) => Math.max(1, p - 1))}
           disabled={page <= 1}
-          className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50"
+          onClick={() => setPage((p) => p - 1)}
+          className="px-4 py-2 border rounded disabled:opacity-50"
         >
           Prev
         </button>
-        <span className="self-center">Page {page} of {totalPages}</span>
+        <span>
+          Page {meta.page || 1} of {meta.pages || 1}
+        </span>
         <button
-          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-          disabled={page >= totalPages}
-          className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50"
+          disabled={page >= meta.pages}
+          onClick={() => setPage((p) => p + 1)}
+          className="px-4 py-2 border rounded disabled:opacity-50"
         >
           Next
         </button>
       </div>
     </div>
   );
-}
+};
+
+export default ListingManagement;
