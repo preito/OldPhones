@@ -5,14 +5,12 @@ import {
   deletePhone,
   togglePhoneDisable,
 } from "../../api/adminApi";
+import { ToastContainer, toast } from "react-toastify";
 
 const ListingManagement = () => {
   const [phones, setPhones] = useState([]);
   const [search, setSearch] = useState("");
-  const [brandFilter, setBrandFilter] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
-  const [sortField, setSortField] = useState("price");
-  const [sortOrder, setSortOrder] = useState("asc");
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [meta, setMeta] = useState({});
@@ -22,24 +20,31 @@ const ListingManagement = () => {
 
   const loadPhones = async () => {
     try {
-      const res = await fetchPhones(page, limit, search, brandFilter, maxPrice, sortField, sortOrder);
+      const res = await fetchPhones(page, limit, search, "", maxPrice, "", "");
       setPhones(res.data);
       setMeta(res.meta);
     } catch (err) {
       console.error("Failed to load phones:", err);
+      toast.error("Failed to load phone listings.");
     }
   };
 
   useEffect(() => {
     loadPhones();
-  }, [page, search, brandFilter, maxPrice, sortField, sortOrder]);
+  }, [page, search, maxPrice]);
 
   const handleToggleDisable = async (id) => {
     try {
       await togglePhoneDisable(id);
-      loadPhones();
+      setPhones((prev) =>
+        prev.map((phone) =>
+          phone._id === id ? { ...phone, disabled: !phone.disabled } : phone
+        )
+      );
+      toast.success("Phone status updated.");
     } catch (err) {
       console.error("Error toggling phone:", err);
+      toast.error("Failed to toggle phone status.");
     }
   };
 
@@ -47,9 +52,11 @@ const ListingManagement = () => {
     if (!window.confirm("Are you sure you want to delete this phone?")) return;
     try {
       await deletePhone(id);
-      loadPhones();
+      setPhones((prev) => prev.filter((phone) => phone._id !== id));
+      toast.success("Phone deleted successfully.");
     } catch (err) {
       console.error("Delete failed:", err);
+      toast.error("Failed to delete phone.");
     }
   };
 
@@ -72,8 +79,10 @@ const ListingManagement = () => {
         return rest;
       });
       loadPhones();
+      toast.success("Phone updated successfully.");
     } catch (err) {
       console.error("Edit failed:", err);
+      toast.error("Failed to save changes.");
     }
   };
 
@@ -83,6 +92,7 @@ const ListingManagement = () => {
 
   return (
     <div className="p-6">
+      <ToastContainer />
       <h2 className="text-2xl font-bold mb-4">Phone Listings Management</h2>
 
       <div className="flex flex-wrap gap-2 mb-4">
@@ -94,35 +104,12 @@ const ListingManagement = () => {
           className="border p-2 rounded"
         />
         <input
-          type="text"
-          placeholder="Filter by brand"
-          value={brandFilter}
-          onChange={(e) => setBrandFilter(e.target.value)}
-          className="border p-2 rounded"
-        />
-        <input
           type="number"
           placeholder="Max price"
           value={maxPrice}
           onChange={(e) => setMaxPrice(e.target.value)}
           className="border p-2 rounded"
         />
-        <select
-          value={sortField}
-          onChange={(e) => setSortField(e.target.value)}
-          className="border p-2 rounded"
-        >
-          <option value="price">Sort by Price</option>
-          <option value="brand">Sort by Brand</option>
-        </select>
-        <select
-          value={sortOrder}
-          onChange={(e) => setSortOrder(e.target.value)}
-          className="border p-2 rounded"
-        >
-          <option value="asc">Asc</option>
-          <option value="desc">Desc</option>
-        </select>
       </div>
 
       <table className="w-full border">
@@ -246,13 +233,19 @@ const ListingManagement = () => {
                 <tr>
                   <td colSpan="7" className="bg-gray-50 p-4">
                     <div>
-                      <p><strong>Seller:</strong> {phone.seller?.name || "N/A"} ({phone.seller?.email || "N/A"})</p>
-                      <p><strong>Reviews:</strong></p>
+                      <p>
+                        <strong>Seller:</strong> {phone.seller?.name || "N/A"} (
+                        {phone.seller?.email || "N/A"})
+                      </p>
+                      <p>
+                        <strong>Reviews:</strong>
+                      </p>
                       <ul className="list-disc list-inside ml-4">
                         {phone.reviews && phone.reviews.length > 0 ? (
                           phone.reviews.map((review, idx) => (
                             <li key={idx}>
-                              <strong>{review.user}</strong>: {review.comment} ({review.rating}★)
+                              <strong>{review.user}</strong>: {review.comment} (
+                              {review.rating}★)
                             </li>
                           ))
                         ) : (
