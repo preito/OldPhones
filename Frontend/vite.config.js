@@ -9,4 +9,8 @@ export default defineConfig({
       '/api': 'http://localhost:5000', // proxy API calls
     },
   },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+  },
 })
