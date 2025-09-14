@@ -2,7 +2,7 @@
  * USYD COMP5347 Assignment 2 - Mobile Website
  * Created 10th May 2025
  */
-const User = require("./models/User");
+const User = require("./models/user");
 const bcrypt = require("bcrypt");
 const express = require("express");
 const session = require("express-session");
@@ -42,10 +42,9 @@ app.use(express.json()); // to parse json data from the request
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/", authRoutes);
-app.use('/', phoneRoutes)
+app.use("/", phoneRoutes);
 app.use("/", routes);
-app.use("/", adminRoutes);  // separate admin route
-
+app.use("/", adminRoutes); // separate admin route
 
 updateUsers();
 // Initialize core admin and image setup
