@@ -11,7 +11,7 @@ const Wishlist = () => {
 
   useEffect(() => {
     if (user?._id) {
-      fetch(`/api/wishlist/${user._id}`)
+      fetch(`${import.meta.env.VITE_API_URL || '/api'}/wishlist/${user._id}`)
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data)) {

@@ -37,7 +37,10 @@ app.use(
   })
 );
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true
+}));
 app.use(express.json()); // to parse json data from the request
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
@@ -52,5 +55,5 @@ ensureSuperAdmin();
 setUpImages.uploadImages();
 
 app.listen(PORT, function () {
-  console.log("Application is listening on url http://localhost:" + PORT + "/");
+  console.log("Application is listening on port " + PORT);
 });

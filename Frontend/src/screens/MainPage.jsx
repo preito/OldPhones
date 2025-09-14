@@ -100,7 +100,7 @@ const MainPage = () => {
 
   useEffect(() => {
     if (viewState === 'home' || viewState === 'search') {
-      fetch(`/api/phone/getPhoneSeller`)
+      fetch(`${import.meta.env.VITE_API_URL || '/api'}/phone/getPhoneSeller`)
         .then(res => res.json())
         .then(data => {
           setMaxPriceCap(Math.ceil(Math.max(...data.map(p => p.price || 0))));
@@ -139,7 +139,7 @@ const MainPage = () => {
       const fetchPaginatedPhones = async () => {
         try {
           const response = await fetch(
-            `/api/admin/phones?page=${page}&limit=9&search=${searchTerm}&brand=${brandFilter}&maxPrice=${maxPrice}`
+            `${import.meta.env.VITE_API_URL || '/api'}/admin/phones?page=${page}&limit=9&search=${searchTerm}&brand=${brandFilter}&maxPrice=${maxPrice}`
           );
           const data = await response.json();
           setSearchResults(data.data);         
@@ -274,7 +274,7 @@ const MainPage = () => {
 
             <h2 className="text-2xl font-bold mb-2">{selectedPhone.title}</h2>
             <img
-              src={`/api/phone/image/name/${encodeURIComponent(selectedPhone.brand)}.jpeg`}
+              src={`${import.meta.env.VITE_API_URL || '/api'}/phone/image/name/${encodeURIComponent(selectedPhone.brand)}.jpeg`}
               alt={selectedPhone.title}
               className="w-full max-w-xs mb-4 rounded-xl transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl"
               onError={(e) => {
@@ -418,7 +418,7 @@ const MainPage = () => {
                     }
 
                     try {
-                      const response = await fetch(`/api/phone/${selectedPhone._id}/reviews`, {
+                      const response = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/phone/${selectedPhone._id}/reviews`, {
                         method: 'POST',
                         headers: {
                           'Content-Type': 'application/json'

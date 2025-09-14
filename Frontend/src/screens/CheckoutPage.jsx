@@ -79,7 +79,7 @@ const CheckoutPage = () => {
 
           const quantity = parseInt(quantityInputs[item.phone._id] ?? item.quantity);
 
-          const res = await fetch(`/api/phone/${item.phone._id}/reduceStock`, {
+          const res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/phone/${item.phone._id}/reduceStock`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ quantity, userId: user._id }),

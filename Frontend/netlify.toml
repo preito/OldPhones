@@ -2,6 +2,9 @@
   command = "npm run build"
   publish = "dist"
 
+[build.environment]
+  VITE_API_URL = "https://xpress-backend.Oldphones.com/api"
+
 [[redirects]]
   from = "/api/*"
   to = "https://xpress-backend.Oldphones.com/:splat"
