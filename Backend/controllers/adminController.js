@@ -1,6 +1,6 @@
-const User = require('../models/User');
-const Phone = require('../models/Phone');
-const Transaction = require('../models/Transaction');
+const User = require("../models/user");
+const Phone = require("../models/Phone");
+const Transaction = require("../models/Transaction");
 const bcrypt = require("bcrypt");
 
 exports.getPaginatedUsers = async (req, res) => {
@@ -10,7 +10,7 @@ exports.getPaginatedUsers = async (req, res) => {
       limit = 10,
       search = "",
       sortField = "firstname",
-      sortOrder = "asc"
+      sortOrder = "asc",
     } = req.query;
 
     const query = search
@@ -75,13 +75,13 @@ exports.deleteUser = async (req, res) => {
     const deletedUser = await User.findByIdAndDelete(id);
 
     if (!deletedUser) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    res.json({ message: 'User deleted successfully', user: deletedUser });
+    res.json({ message: "User deleted successfully", user: deletedUser });
   } catch (error) {
-    console.error('Error deleting user:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("Error deleting user:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -90,7 +90,7 @@ exports.toggleUserDisable = async (req, res) => {
     const { id } = req.params;
 
     const user = await User.findById(id);
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
     // Toggle disable state
     if (user.disabled) {
@@ -102,17 +102,23 @@ exports.toggleUserDisable = async (req, res) => {
     await user.save();
 
     res.json({
-      message: `User has been ${user.disabled ? 'disabled' : 'enabled'}`,
+      message: `User has been ${user.disabled ? "disabled" : "enabled"}`,
       user,
     });
   } catch (error) {
-    console.error('Error toggling user disable:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("Error toggling user disable:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 exports.getPaginatedPhones = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search = "", brand = "", maxPrice = "" } = req.query;
+    const {
+      page = 1,
+      limit = 10,
+      search = "",
+      brand = "",
+      maxPrice = "",
+    } = req.query;
 
     const query = {};
 
@@ -188,7 +194,9 @@ exports.updatePhone = async (req, res) => {
       return res.status(404).json({ message: "Phone not found." });
     }
 
-    res.status(200).json({ message: "Phone updated successfully", data: phone });
+    res
+      .status(200)
+      .json({ message: "Phone updated successfully", data: phone });
   } catch (err) {
     console.error("Error updating phone:", err);
     res.status(500).json({ message: "Internal server error" });
@@ -236,39 +244,55 @@ exports.deletePhone = async (req, res) => {
 
 exports.getModeratedReviews = async (req, res) => {
   try {
-    const { searchTitle = '', searchReviewer = '', searchComment = '', page = 1, limit = 10 } = req.query;
+    const {
+      searchTitle = "",
+      searchReviewer = "",
+      searchComment = "",
+      page = 1,
+      limit = 10,
+    } = req.query;
     const skip = (page - 1) * limit;
 
     const basePipeline = [
-      { $unwind: '$reviews' },
+      { $unwind: "$reviews" },
       {
         $addFields: {
-          'reviews.reviewerObjectId': {
-            $toObjectId: '$reviews.reviewer',
+          "reviews.reviewerObjectId": {
+            $toObjectId: "$reviews.reviewer",
           },
         },
       },
       {
         $lookup: {
-          from: 'users',
-          localField: 'reviews.reviewerObjectId',
-          foreignField: '_id',
-          as: 'reviewerInfo',
+          from: "users",
+          localField: "reviews.reviewerObjectId",
+          foreignField: "_id",
+          as: "reviewerInfo",
         },
       },
-      { $unwind: '$reviewerInfo' },
+      { $unwind: "$reviewerInfo" },
       {
         $match: {
           ...(searchTitle && {
-            title: { $regex: searchTitle, $options: 'i' },
+            title: { $regex: searchTitle, $options: "i" },
           }),
           ...(searchComment && {
-            'reviews.comment': { $regex: searchComment, $options: 'i' },
+            "reviews.comment": { $regex: searchComment, $options: "i" },
           }),
           ...(searchReviewer && {
             $or: [
-              { 'reviewerInfo.firstname': { $regex: searchReviewer, $options: 'i' } },
-              { 'reviewerInfo.lastname': { $regex: searchReviewer, $options: 'i' } },
+              {
+                "reviewerInfo.firstname": {
+                  $regex: searchReviewer,
+                  $options: "i",
+                },
+              },
+              {
+                "reviewerInfo.lastname": {
+                  $regex: searchReviewer,
+                  $options: "i",
+                },
+              },
             ],
           }),
         },
@@ -279,15 +303,15 @@ exports.getModeratedReviews = async (req, res) => {
       ...basePipeline,
       {
         $project: {
-          _id: '$reviews._id',
-          hidden: '$reviews.hidden',
-          phoneId: '$_id',
-          phoneTitle: '$title',
-          rating: '$reviews.rating',
-          comment: '$reviews.comment',
-          reviewer: '$reviews.reviewer',
+          _id: "$reviews._id",
+          hidden: "$reviews.hidden",
+          phoneId: "$_id",
+          phoneTitle: "$title",
+          rating: "$reviews.rating",
+          comment: "$reviews.comment",
+          reviewer: "$reviews.reviewer",
           reviewerName: {
-            $concat: ['$reviewerInfo.firstname', ' ', '$reviewerInfo.lastname'],
+            $concat: ["$reviewerInfo.firstname", " ", "$reviewerInfo.lastname"],
           },
         },
       },
@@ -295,10 +319,7 @@ exports.getModeratedReviews = async (req, res) => {
       { $limit: Number(limit) },
     ];
 
-    const countPipeline = [
-      ...basePipeline,
-      { $count: 'total' },
-    ];
+    const countPipeline = [...basePipeline, { $count: "total" }];
 
     const [reviews, totalCount] = await Promise.all([
       Phone.aggregate(dataPipeline),
@@ -316,8 +337,8 @@ exports.getModeratedReviews = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Error fetching reviews:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error("Error fetching reviews:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
@@ -326,12 +347,17 @@ exports.toggleReviewHidden = async (req, res) => {
 
   try {
     // First, find the specific review to check its current hidden state
-    const phone = await Phone.findOne({ _id: phoneId, "reviews.reviewer": reviewerId });
+    const phone = await Phone.findOne({
+      _id: phoneId,
+      "reviews.reviewer": reviewerId,
+    });
     if (!phone) {
       return res.status(404).json({ message: "Phone or review not found." });
     }
 
-    const review = phone.reviews.find(r => r.reviewer.toString() === reviewerId);
+    const review = phone.reviews.find(
+      (r) => r.reviewer.toString() === reviewerId
+    );
     const isHidden = !!review.hidden;
 
     // Use positional operator `$` to update the matching review inside the array
@@ -345,7 +371,7 @@ exports.toggleReviewHidden = async (req, res) => {
     );
 
     res.status(200).json({
-      message: `Review has been ${isHidden ? "unhidden" : "hidden"}.`
+      message: `Review has been ${isHidden ? "unhidden" : "hidden"}.`,
     });
   } catch (err) {
     console.error("Error toggling review hidden status:", err);
@@ -364,21 +390,21 @@ exports.getPaginatedTransactions = async (req, res) => {
         .sort({ timestamp: -1 }) // newest first
         .skip(skip)
         .limit(Number(limit))
-        .populate('buyer', 'firstname lastname') // populate buyer name
-        .populate('items.phone', 'title'), // populate phone title
-      Transaction.countDocuments()
+        .populate("buyer", "firstname lastname") // populate buyer name
+        .populate("items.phone", "title"), // populate phone title
+      Transaction.countDocuments(),
     ]);
     res.status(200).json({
       data: transactions,
       meta: {
         total,
         page: Number(page),
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     });
   } catch (err) {
-    console.error('Failed to fetch transactions:', err);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Failed to fetch transactions:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -390,11 +416,7 @@ exports.hasUnreadTransactions = async (req, res) => {
       hasUnread: Boolean(exists),
     });
   } catch (err) {
-    console.error('Failed to check unread transactions:', err);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Failed to check unread transactions:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
-
-
-
-
