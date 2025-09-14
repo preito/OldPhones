@@ -1,5 +1,5 @@
 const bcrypt = require("bcrypt");
-const User = require("../models/User");
+const User = require("../models/user");
 
 const updateUsers = async () => {
   try {
@@ -11,7 +11,7 @@ const updateUsers = async () => {
         $set: {
           verified: true,
           password: hashedPassword,
-          createdAt: new Date("2025-05-18T00:00:00Z")
+          createdAt: new Date("2025-05-18T00:00:00Z"),
         },
       }
     );
