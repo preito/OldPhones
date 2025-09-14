@@ -1,18 +1,18 @@
-const User = require('../models/User');
-const Transaction = require('../models/Transaction');
+const User = require("../models/user");
+const Transaction = require("../models/Transaction");
 
 exports.checkUserByCredentials = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
+      return res.status(400).json({ error: "Email and password are required" });
     }
 
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.json({ exists: false, message: 'User not found' });
+      return res.json({ exists: false, message: "User not found" });
     }
 
     // Here you’d typically compare the password with bcrypt
@@ -24,19 +24,18 @@ exports.checkUserByCredentials = async (req, res) => {
       console.log("wrong pass");
       return res.json({ exists: true, match: false });
     }
-
   } catch (err) {
     console.error("Error checking credentials:", err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 };
 
 exports.getUsers = async (req, res) => {
   try {
-    const users = await User.find().select('-password'); // exclude password
+    const users = await User.find().select("-password"); // exclude password
     res.status(200).json(users);
   } catch (error) {
-    res.status(500).json({ message: 'Server error: ' + error.message });
+    res.status(500).json({ message: "Server error: " + error.message });
   }
 };
 
@@ -45,31 +44,30 @@ exports.getUsers = async (req, res) => {
 // @access  Public (for now)
 exports.getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select('-password');
+    const user = await User.findById(req.params.id).select("-password");
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({ message: 'Server error: ' + error.message });
+    res.status(500).json({ message: "Server error: " + error.message });
   }
 };
-
 
 exports.saveTransaction = async (req, res) => {
   const { userId, items, total } = req.body;
 
   try {
     const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
     const newTransaction = new Transaction({
       buyer: user._id,
-      items: items.map(item => ({
+      items: items.map((item) => ({
         phone: item.phoneId,
-        quantity: item.quantity
+        quantity: item.quantity,
       })),
       total,
     });
@@ -77,12 +75,11 @@ exports.saveTransaction = async (req, res) => {
     await newTransaction.save();
 
     res.status(200).json({
-      message: 'Transaction saved successfully',
-      transactionId: newTransaction._id
+      message: "Transaction saved successfully",
+      transactionId: newTransaction._id,
     });
   } catch (err) {
-    console.error('Transaction save error:', err);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Transaction save error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
-
