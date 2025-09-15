@@ -100,7 +100,7 @@ const MainPage = () => {
 
   useEffect(() => {
     if (viewState === 'home' || viewState === 'search') {
-      fetch(`${import.meta.env.VITE_API_URL || '/api'}/phone/getPhoneSeller`)
+      fetch(`${import.meta.env.VITE_API_URL || '/api'}/phones`)
         .then(res => res.json())
         .then(data => {
           setMaxPriceCap(Math.ceil(Math.max(...data.map(p => p.price || 0))));

@@ -1,6 +1,6 @@
 /**
  * USYD COMP5347 Assignment 2 - Mobile Website
- * Created 10th May 2025
+ * Created 10th Aug 2025
  */
 const User = require("./models/user");
 const bcrypt = require("bcrypt");
@@ -37,10 +37,12 @@ app.use(
   })
 );
 
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json()); // to parse json data from the request
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));

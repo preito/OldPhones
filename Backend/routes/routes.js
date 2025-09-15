@@ -10,11 +10,7 @@ router.get('/api/phone', phoneController.getPhones);
 
 router.post('/api/user/check-credentials', userController.checkUserByCredentials);
 
-// GET /api/phones → Get all phones
-router.get('/api/phone/getPhoneSeller', phoneController.getPhoneSeller);
-
-// GET /api/phones/:id → Get a single phone by ID
-router.get('/api/phone/:id', phoneController.getPhoneById);
+// Phone routes moved to phoneRoutes.js
 
 // GET /api/users → Get all users
 router.get('/api/user', userController.getUsers);
