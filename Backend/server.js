@@ -37,13 +37,16 @@ app.use(
   })
 );
 
+// CORS configuration - dynamically build allowed origins
+const allowedOrigins = [
+  'http://localhost:5173',                   // local development
+  process.env.FRONTEND_URL,                  // production frontend
+  'https://oldphones-frontend.onrender.com' // legacy production URL
+].filter(Boolean); // Remove any undefined values
+
 app.use(
   cors({
-    origin: [
-      process.env.FRONTEND_URL || "http://localhost:5173",
-      "https://oldphones-frontend.onrender.com",
-      "http://localhost:5173"
-    ],
+    origin: allowedOrigins,
     credentials: true,
   })
 );

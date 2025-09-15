@@ -2,6 +2,7 @@ const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
+const { verificationUrl, resetPasswordUrl } = require("../utils/urls");
 
 exports.login = async (req, res) => {
   try {
@@ -92,7 +93,7 @@ exports.register = async (req, res) => {
     });
     await user.save();
 
-    const verifyURL = `${process.env.FRONTEND_URL}/verify-email?token=${token}&email=${user.email}`;
+    const verifyURL = verificationUrl(token, user.email);
 
     await sendEmail({
       to: user.email,
@@ -177,9 +178,7 @@ exports.forgotPassword = async (req, res) => {
     user.resetPasswordExpires = new Date(Date.now() + 1000 * 60 * 60);
     await user.save();
 
-    const resetURL = `${
-      process.env.FRONTEND_URL
-    }/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
+    const resetURL = resetPasswordUrl(token, email);
     await sendEmail({
       to: email,
       subject: "Reset your password",
